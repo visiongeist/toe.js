@@ -1,4 +1,5 @@
-require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
+(function (gestures, state, calc, util) {
+
     var config = {
             tap_double_max_interval: 300,
             tap_max_distance: 10,
@@ -13,8 +14,7 @@ require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
 
     /**
      *
-     * @param event
-     * @return {*}
+     * @param {jQuery.Event} event
      */
     function tap(event)
     {
@@ -22,47 +22,53 @@ require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
             duration = timestamp - state.timestamp,
             $target = $(event.target);
 
-        if(config.hold_timeout < duration) { // if the hold was already fired do not fire a tap
+        if (config.hold_timeout < duration) { // if the hold was already fired do not fire a tap
             return;
         }
 
-        if(!doubletap(event)) {
+        event = state.events.start.originalEvent;
+
+        if (!doubletap(event)) {
             distance = state.touches.move ? calc.getDistance(state.touches.start[0], state.touches.move[0]) : 0;
 
-            if(distance < config.tap_max_distance) {
+            if (distance < config.tap_max_distance) {
                 state.gesture = 'tap';
+
                 prevTapEndTime = timestamp;
                 prevTapPos = state.touches.start;
 
-                if($target.data('events').doubletap) { // doubletap event is bound to the target
-
+                if (util.hasEvent($target, 'doubletap')) { // doubletap event is bound to the target
                     setTimeout(function() { // the tap event will be delayed because there might be a double tap
-                        if(prevTapPos && state.prevGesture === 'tap' && (state.timestamp - prevTapEndTime) < config.tap_double_max_interval) {
+                        if(prevTapPos && state.prevGesture !== 'doubletap' && ((new Date().getTime() - prevTapEndTime) > config.tap_double_max_interval)) {
                             $target.trigger($.Event('tap', {
-                                originalEvent: state.events.start.originalEvent
+                                originalEvent: event
                             }));
                         }
-                    }, config.tap_double_max_interval + 1);
+                    }, config.tap_double_max_interval);
                 } else {
-
                     $target.trigger($.Event('tap', {
-                        originalEvent: state.events.start.originalEvent
+                        originalEvent: event
                     }));
                 }
             }
         }
     }
 
+    /**
+     *
+     * @param {jQuery.Event} event
+     * @return {Boolean} true if doubletap was recognized
+     */
     function doubletap(event) {
         if (prevTapPos && state.prevGesture === 'tap' && (state.timestamp - prevTapEndTime) < config.tap_double_max_interval)
         {
-            if(prevTapPos && state.touches.start && (calc.getDistance(prevTapPos[0], state.touches.start[0]) < config.tap_distance)) {
+            if (prevTapPos && state.touches.start && (calc.getDistance(prevTapPos[0], state.touches.start[0]) < config.tap_distance)) {
 
                 state.gesture = 'doubletap';
                 prevTapEndTime = null;
 
                 $(event.target).trigger($.Event('doubletap', {
-                    originalEvent: state.events.start.originalEvent
+                    originalEvent: event
                 }));
 
                 return true;
@@ -71,13 +77,17 @@ require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
         return false;
     }
 
+    /**
+     *
+     * @param {jQuery.Event} event
+     */
     function taphold(event)
     {
         state.gesture = 'taphold';
         clearTimeout(holdTimer);
 
         holdTimer = setTimeout(function() {
-            if(state.gesture === 'taphold') {
+            if (state.gesture === 'taphold') {
                 $(event.target).trigger($.Event('taphold', {
                     originalEvent: state.events.start.originalEvent
                 }));
@@ -89,4 +99,4 @@ require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
     gestures.add('end', 'tap', tap);
     gestures.add('start', 'taphold', taphold);
 
-});
+}(gestures, state, calc, util));

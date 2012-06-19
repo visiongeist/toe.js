@@ -1,69 +1,101 @@
-require(['util', 'state', 'gestures'], function (util, state, gestures) {
+/*!
+ * toe.js
+ * version 0.8
+ * author: Damien Antipa
+ * https://fit.corp.adobe.com/dantipa/toe.js
+ */
+var isTouch = !!('ontouchstart' in window) ? 1 : 0,
+    gesture,
+    $proxyStart, $proxyMove, $proxyEnd;
 
-    var isTouch = !!('ontouchstart' in window) ? 1 : 0,
-        gesture;
+/**
+ *
+ * @param {jQuery.Event} event
+ */
+function touchstart(event) {
+    var $target = $(event.target);
 
-    function touchstart(event) {
-        var $target = $(event.target);
+    state.clearState();
 
-        state.clearState();
+    state.touches.start = util.getTouches(event);
+    state.events.start = event;
+    state.timestamp = new Date().getTime();
 
-        state.touches.start = util.getTouches(event);
-        state.events.start = event;
-        state.timestamp = new Date().getTime();
+    state.events.start = event;
 
-        state.events.start = event;
+    state.offset = $target.offset();
 
-        state.offset = $target.offset();
+    gestures.exec('start', event);
+}
 
-        gestures.exec('start', event);
+/**
+ *
+ * @param {jQuery.Event} event
+ */
+function touchmove(event) {
+    if(!state.timestamp) {
+        return;
     }
 
-    function touchmove(event) {
-        if(!state.timestamp) {
-            return;
-        }
+    state.touches.move = util.getTouches(event);
+    state.events.move = event;
 
-        state.touches.move = util.getTouches(event);
-        state.events.move = event;
+    gestures.exec('move', event);
+}
 
-        gestures.exec('move', event);
+/**
+ *
+ * @param {jQuery.Event} event
+ */
+function touchend(event) {
+    if(!state.timestamp) {
+        return;
     }
 
-    function touchend(event) {
-        if(!state.timestamp) {
-            return;
-        }
+    state.touches.end = util.getTouches(event);
+    state.events.end = event;
 
-        state.touches.end = util.getTouches(event);
-        state.events.end = event;
+    gestures.exec('end', event);
 
-        gestures.exec('end', event);
+    state.prevGesture = state.gesture;
+    state.clearState();
+}
 
-        state.prevGesture = state.gesture;
-        state.clearState();
+function eventSetup(data, namespaces, eventHandler) {
+    var $this = $(this),
+        toe = $this.data('toe') || 0;
+
+    if (toe === 0) {
+        $this.on('touchstart', $proxyStart);
+        $this.on('touchmove', $proxyMove);
+        $this.on('touchend touchcancel', $proxyEnd);
     }
 
-    if (isTouch) { // event binding will just work on touch devices
+    $this.data('toe', ++toe);
+}
 
-        /*for (i = 0; i < gestures[timing].length; i++) {
-            gestures[timing][i].func(event);
-        }*/
+function eventTeardown(namespace) {
+    var $this = $(this),
+        toe = $this.data('toe') || 0;
 
+    $this.data('toe', --toe);
 
-        $.each(['taphold'/*,'tap','doubletap','transformstart','transform','transformend','swipe'*/], function (i, event) {
-            $.event.special[event] = {
-
-
-                setup: function(data, namespaces, eventHandler) {
-                    //TODO avoid double binding
-
-                    $(this).on('touchstart', $.proxy(touchstart, this));
-                    $(this).on('touchmove', $.proxy(touchmove, this));
-                    $(this).on('touchend touchcancel', $.proxy(touchend, this));
-                }
-            };
-        });
+    if (toe === 0) {
+        $this.off('touchstart', $proxyStart);
+        $this.off('touchmove', $proxyMove);
+        $this.off('touchend touchcancel', $proxyEnd);
     }
+}
 
-});
+if (isTouch) { // event binding will just work on touch devices
+    $proxyStart = $.proxy(touchstart, this);
+    $proxyMove = $.proxy(touchmove, this);
+    $proxyEnd = $.proxy(touchend, this);
+
+    $.each(['taphold','tap','doubletap','transformstart','transform','transformend','swipe'], function (i, event) {
+        $.event.special[event] = {
+            setup: eventSetup,
+            teardown: eventTeardown
+        };
+    });
+}

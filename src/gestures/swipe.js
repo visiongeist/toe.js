@@ -1,4 +1,5 @@
-require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
+(function (gestures, state, calc) {
+
     var config = {
             swipe_time: 300,
             swipe_min_distance: 30
@@ -6,8 +7,8 @@ require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
 
     /**
      *
-     * @param event
-     */
+     * @param {jQuery.Event} event
+        */
     function swipe(event)
     {
         var duration = new Date().getTime() - state.timestamp,
@@ -35,4 +36,4 @@ require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
 
     gestures.add('end', 'swipe', swipe);
 
-});
+}(gestures, state, calc));
