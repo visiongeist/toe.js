@@ -1,26 +1,25 @@
-(function ($, toe, window, undefined) {
+define(function () {
 
-    toe.gestures = {
+    var gestures = {
         start: [],
         move: [],
         end: []
     };
 
-    toe.add = function (timing, gesture, func, priority) {
+    gestures.add = function (timing, gesture, func, priority) {
         var i,
-            exec = toe.gestures[timing],
             tmp,
             inserted = false;
 
         if (priority) {
-            for(i = 0; i < exec.length; i++) {
-                tmp = exec[i];
+            for(i = 0; i < gestures[timing].length; i++) {
+                tmp = gestures[timing][i];
 
                 if(tmp.priority && tmp.priority < priority) {
                     continue;
                 }
 
-                exec.splice(i, 0, {
+                gestures[timing].splice(i, 0, {
                     gesture: gesture,
                     func: func,
                     priority: undefined
@@ -30,7 +29,7 @@
         }
 
         if(!priority || !inserted) {
-            exec.push({
+            gestures[timing].push({
                 gesture: gesture,
                 func: func,
                 priority: undefined
@@ -38,14 +37,14 @@
         }
     };
 
-    toe.exec = function (timing, event) {
-        var gestures,
-            i;
+    gestures.exec = function (timing, event) {
+        var i;
 
-        gestures = toe.gestures[timing];
-        for (i = 0; i < gestures.length; i++) {
-            gestures[i].func(event);
+        for (i = 0; i < gestures[timing].length; i++) {
+            gestures[timing][i].func(event);
         }
     };
 
-}(jQuery, toe, this));
+    return gestures;
+
+});

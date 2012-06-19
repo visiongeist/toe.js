@@ -1,13 +1,11 @@
-(function ($, toe, window, undefined) {
-    var config = toe.config = $.extend(toe.config, {
+require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
+    var config = {
             tap_double_max_interval: 300,
             tap_max_distance: 10,
             tap_distance: 20,
 
             hold_timeout: 500
-        }),
-        state = toe.state,
-        gestures = toe.gestures,
+        },
         distance,
         prevTapPos,
         prevTapEndTime,
@@ -29,7 +27,7 @@
         }
 
         if(!doubletap(event)) {
-            distance = state.touches.move ? toe.calculateDistance(state.touches.start[0], state.touches.move[0]) : 0;
+            distance = state.touches.move ? calc.getDistance(state.touches.start[0], state.touches.move[0]) : 0;
 
             if(distance < config.tap_max_distance) {
                 state.gesture = 'tap';
@@ -58,7 +56,7 @@
     function doubletap(event) {
         if (prevTapPos && state.prevGesture === 'tap' && (state.timestamp - prevTapEndTime) < config.tap_double_max_interval)
         {
-            if(prevTapPos && state.touches.start && (toe.calculateDistance(prevTapPos[0], state.touches.start[0]) < config.tap_distance)) {
+            if(prevTapPos && state.touches.start && (calc.getDistance(prevTapPos[0], state.touches.start[0]) < config.tap_distance)) {
 
                 state.gesture = 'doubletap';
                 prevTapEndTime = null;
@@ -88,7 +86,7 @@
 
     }
 
-    toe.add('end', 'tap', tap);
-    toe.add('start', 'taphold', taphold);
+    gestures.add('end', 'tap', tap);
+    gestures.add('start', 'taphold', taphold);
 
-}(jQuery, toe, this));
+});

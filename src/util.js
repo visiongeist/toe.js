@@ -1,12 +1,17 @@
-(function ($, toe, window, undefined) {
-
+define(function () {
+    var util = {};
     /**
      *
      * @param event
      * @return {TouchEvent[]}
      */
-    toe.getTouches = function (event) {
-        return event.originalEvent.touches.length > 0 ? $.extend(true, {}, event.originalEvent.touches) : (event.originalEvent.changedTouches.length > 0 ? $.extend(true, {}, event.originalEvent.changedTouches) : []);
+    util.getTouches = function (event) {
+        return event.originalEvent.touches.length > 0 ?
+            $.extend(true, {}, event.originalEvent.touches) :
+            (event.originalEvent.changedTouches.length > 0 ?
+                $.extend(true, {}, event.originalEvent.changedTouches) :
+                []
+                );
     };
 
     /**
@@ -15,7 +20,7 @@
      * @param eventName
      * @return {Array[]|Boolean}
      */
-    toe.hasEvent = function ($target, event) {
+    util.hasEvent = function ($target, event) {
         if(jQuery.isFunction(event)) {
             //TODO find function
         } else { // assume it's the event name (String)
@@ -23,4 +28,5 @@
         }
     };
 
-}(jQuery, toe, this));
+    return util;
+});

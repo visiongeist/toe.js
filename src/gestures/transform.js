@@ -1,16 +1,13 @@
-(function ($, toe, window, undefined) {
-    var config = toe.config = $.extend(toe.config, {
+require(['gestures', 'state', 'calc'], function (gestures, state, calc) {
+    var config = {
             scale_treshold     : 0.1,
             rotation_treshold  : 15 // °
-        }),
-        state = toe.state,
-        gestures = toe.gestures,
+        },
         started = false;
 
     /**
      *
      * @param event
-     * @return {Boolean}
      */
     function transform(event)
     {
@@ -22,8 +19,8 @@
             return;
         }
 
-        rotation = toe.calculateRotation(state.touches.start, state.touches.move);
-        scale = toe.calculateScale(state.touches.start, state.touches.move);
+        rotation = calc.getRotation(state.touches.start, state.touches.move);
+        scale = calc.getScale(state.touches.start, state.touches.move);
 
         if(state.gesture === 'transform' || Math.abs(1-scale) > config.scale_treshold || Math.abs(rotation) > config.rotation_treshold) {
             state.gesture = 'transform';
@@ -57,8 +54,8 @@
             $target = $(event.target);
 
         if(state.gesture === 'transform') {
-            rotation = toe.calculateRotation(state.touches.start, state.touches.move);
-            scale = toe.calculateScale(state.touches.start, state.touches.move);
+            rotation = calc.getRotation(state.touches.start, state.touches.move);
+            scale = calc.getScale(state.touches.start, state.touches.move);
 
             $target.trigger($.Event('transformend', {
                 originalEvent: event.originalEvent,
@@ -71,6 +68,6 @@
         }
     }
 
-    toe.add('move', 'transform', transform);
-    toe.add('end', 'transformend', transformend);
-}(jQuery, toe, this));
+    gestures.add('move', 'transform', transform);
+    gestures.add('end', 'transformend', transformend);
+});

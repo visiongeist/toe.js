@@ -1,6 +1,6 @@
-(function ($, toe, window, undefined) {
+define(function () {
 
-    toe.state = {
+    var state = {
         touches: {},
         events: {},
         timestamp: undefined,
@@ -10,12 +10,12 @@
         offset: {}
     };
 
-    toe.clearState = function () {
-        var state = toe.state;
-
+    state.clearState = function () {
         state.touches = {};
         state.events = {};
         state.timestamp = undefined;
     };
 
-}(jQuery, toe, this));
+    return state;
+
+});

@@ -1,5 +1,10 @@
-require.config({
-    baseUrl: '../src'
-});
-
-require(['core'], function ())
+({
+    baseUrl: "../src",
+    include: ['main'],
+    insertRequire: ['main'],
+    out: '../dist/toe.min.js',
+    name: '../build/ext/almond',
+    paths: {
+        jquery: '../build/jquery'
+    }
+})
