@@ -25,5 +25,5 @@ util.getTouches = function (event) {
  * @return {Boolean}
  */
 util.hasEvent = function ($target, event) {
-   return $target.data('events')[event];
+   return $target.data('events') ? $target.data('events')[event] : 0;
 };
