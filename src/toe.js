@@ -2,10 +2,9 @@
  * toe.js
  * version 0.8
  * author: Damien Antipa
- * https://fit.corp.adobe.com/dantipa/toe.js
+ * https://github.com/dantipa/toe.js
  */
-var isTouch = !!('ontouchstart' in window) ? 1 : 0,
-    gesture,
+var isTouch = !!('ontouchstart' in window),
     $proxyStart, $proxyMove, $proxyEnd;
 
 /**
@@ -61,6 +60,10 @@ function touchend(event) {
     state.clearState();
 }
 
+$proxyStart = $.proxy(touchstart, this);
+$proxyMove = $.proxy(touchmove, this);
+$proxyEnd = $.proxy(touchend, this);
+
 function eventSetup(data, namespaces, eventHandler) {
     var $this = $(this),
         toe = $this.data('toe') || 0;
@@ -87,15 +90,11 @@ function eventTeardown(namespace) {
     }
 }
 
-if (isTouch) { // event binding will just work on touch devices
-    $proxyStart = $.proxy(touchstart, this);
-    $proxyMove = $.proxy(touchmove, this);
-    $proxyEnd = $.proxy(touchend, this);
-
-    $.each(['taphold','tap','doubletap','transformstart','transform','transformend','swipe'], function (i, event) {
-        $.event.special[event] = {
-            setup: eventSetup,
-            teardown: eventTeardown
-        };
-    });
+function registerSpecialEvent(eventName) {
+	if (isTouch) { // event binding will just work on touch devices
+		$.event.special[eventName] = {
+			setup: eventSetup,
+			teardown: eventTeardown
+		};
+	}
 }

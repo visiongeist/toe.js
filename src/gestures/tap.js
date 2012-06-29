@@ -97,6 +97,7 @@
     }
 
     gestures.add('end', 'tap', tap);
+	gestures.add('none', 'doubletap', $.noop);
     gestures.add('start', 'taphold', taphold);
 
 }(gestures, state, calc, util));

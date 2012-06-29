@@ -26,7 +26,7 @@ util.getTouches = function (event) {
  * @return {Boolean}
  */
 util.hasEvent = function ($target, event) {
-   return $target.data('events')[event];
+   return $target.data('events') ? $target.data('events')[event] : 0;
 };
 var calc = {};
 
@@ -150,9 +150,10 @@ state.clearState = function () {
  * @type {Object[]) end
  */
 var gestures = {
-    start: [],
-    move: [],
-    end: []
+	start:[],
+	move:[],
+	end:[],
+	none:[]
 };
 
 /**
@@ -164,34 +165,36 @@ var gestures = {
  * @param {Number} priority if necessary for calling order or undefined
  */
 gestures.add = function (timing, gesture, func, priority) {
-    var i,
-        tmp,
-        inserted = false;
+	var i,
+		tmp,
+		inserted = false;
 
-    if (priority) {
-        for(i = 0; i < gestures[timing].length; i++) {
-            tmp = gestures[timing][i];
+	if (priority) {
+		for (i = 0; i < gestures[timing].length; i++) {
+			tmp = gestures[timing][i];
 
-            if(tmp.priority && tmp.priority < priority) {
-                continue;
-            }
+			if (tmp.priority && tmp.priority < priority) {
+				continue;
+			}
 
-            gestures[timing].splice(i, 0, {
-                gesture: gesture,
-                func: func,
-                priority: undefined
-            });
-            inserted = true;
-        }
-    }
+			gestures[timing].splice(i, 0, {
+				gesture:gesture,
+				func:func,
+				priority:undefined
+			});
+			inserted = true;
+		}
+	}
 
-    if(!priority || !inserted) {
-        gestures[timing].push({
-            gesture: gesture,
-            func: func,
-            priority: undefined
-        });
-    }
+	if (!priority || !inserted) {
+		gestures[timing].push({
+			gesture:gesture,
+			func:func,
+			priority:undefined
+		});
+	}
+
+	registerSpecialEvent(gesture);
 };
 
 /**
@@ -200,20 +203,19 @@ gestures.add = function (timing, gesture, func, priority) {
  * @param event
  */
 gestures.exec = function (timing, event) {
-    var i;
+	var i;
 
-    for (i = 0; i < gestures[timing].length; i++) {
-        gestures[timing][i].func(event);
-    }
+	for (i = 0; i < gestures[timing].length; i++) {
+		gestures[timing][i].func(event);
+	}
 };
 /*!
  * toe.js
  * version 0.8
  * author: Damien Antipa
- * https://fit.corp.adobe.com/dantipa/toe.js
+ * https://github.com/dantipa/toe.js
  */
-var isTouch = !!('ontouchstart' in window) ? 1 : 0,
-    gesture,
+var isTouch = !!('ontouchstart' in window),
     $proxyStart, $proxyMove, $proxyEnd;
 
 /**
@@ -269,6 +271,10 @@ function touchend(event) {
     state.clearState();
 }
 
+$proxyStart = $.proxy(touchstart, this);
+$proxyMove = $.proxy(touchmove, this);
+$proxyEnd = $.proxy(touchend, this);
+
 function eventSetup(data, namespaces, eventHandler) {
     var $this = $(this),
         toe = $this.data('toe') || 0;
@@ -295,17 +301,13 @@ function eventTeardown(namespace) {
     }
 }
 
-if (isTouch) { // event binding will just work on touch devices
-    $proxyStart = $.proxy(touchstart, this);
-    $proxyMove = $.proxy(touchmove, this);
-    $proxyEnd = $.proxy(touchend, this);
-
-    $.each(['taphold','tap','doubletap','transformstart','transform','transformend','swipe'], function (i, event) {
-        $.event.special[event] = {
-            setup: eventSetup,
-            teardown: eventTeardown
-        };
-    });
+function registerSpecialEvent(eventName) {
+	if (isTouch) { // event binding will just work on touch devices
+		$.event.special[eventName] = {
+			setup: eventSetup,
+			teardown: eventTeardown
+		};
+	}
 }
 (function (gestures, state, calc) {
 
@@ -445,6 +447,7 @@ if (isTouch) { // event binding will just work on touch devices
     }
 
     gestures.add('end', 'tap', tap);
+	gestures.add('none', 'doubletap', $.noop);
     gestures.add('start', 'taphold', taphold);
 
 }(gestures, state, calc, util));

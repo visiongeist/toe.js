@@ -6,9 +6,10 @@
  * @type {Object[]) end
  */
 var gestures = {
-    start: [],
-    move: [],
-    end: []
+	start:[],
+	move:[],
+	end:[],
+	none:[]
 };
 
 /**
@@ -20,34 +21,36 @@ var gestures = {
  * @param {Number} priority if necessary for calling order or undefined
  */
 gestures.add = function (timing, gesture, func, priority) {
-    var i,
-        tmp,
-        inserted = false;
+	var i,
+		tmp,
+		inserted = false;
 
-    if (priority) {
-        for(i = 0; i < gestures[timing].length; i++) {
-            tmp = gestures[timing][i];
+	if (priority) {
+		for (i = 0; i < gestures[timing].length; i++) {
+			tmp = gestures[timing][i];
 
-            if(tmp.priority && tmp.priority < priority) {
-                continue;
-            }
+			if (tmp.priority && tmp.priority < priority) {
+				continue;
+			}
 
-            gestures[timing].splice(i, 0, {
-                gesture: gesture,
-                func: func,
-                priority: undefined
-            });
-            inserted = true;
-        }
-    }
+			gestures[timing].splice(i, 0, {
+				gesture:gesture,
+				func:func,
+				priority:undefined
+			});
+			inserted = true;
+		}
+	}
 
-    if(!priority || !inserted) {
-        gestures[timing].push({
-            gesture: gesture,
-            func: func,
-            priority: undefined
-        });
-    }
+	if (!priority || !inserted) {
+		gestures[timing].push({
+			gesture:gesture,
+			func:func,
+			priority:undefined
+		});
+	}
+
+	registerSpecialEvent(gesture);
 };
 
 /**
@@ -56,9 +59,9 @@ gestures.add = function (timing, gesture, func, priority) {
  * @param event
  */
 gestures.exec = function (timing, event) {
-    var i;
+	var i;
 
-    for (i = 0; i < gestures[timing].length; i++) {
-        gestures[timing][i].func(event);
-    }
+	for (i = 0; i < gestures[timing].length; i++) {
+		gestures[timing][i].func(event);
+	}
 };
