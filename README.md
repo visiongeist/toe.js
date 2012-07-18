@@ -9,9 +9,9 @@ The goal of toe.js is
 * Fast responding events to give the user a better experience
 * Extensible, hooks allow new touch events to be part of toe and use existing functionality
 * Customizable through [grunt](https://github.com/cowboy/grunt). The build process allows you to remove not needed gestures
-* Tiny overhead (1656 bytes gzipped by version 0.8)
+* Tiny overhead (1649 bytes gzipped by version 1.0)
 
-## Available events (v. 0.8)
+## Available events (v. 1.0)
 
 * tap
 * doubletap (Attention: If you bind doubletap AND tap to the same element then the tap event will be called deferred)
@@ -19,7 +19,7 @@ The goal of toe.js is
 * swipe (all directions)
 * transformstart, transform, transformend (scale and rotation)
 
-Coming soon: touchscroll
+Coming soon: fancy drag and drop
 
 ## Usage
 
@@ -86,6 +86,14 @@ This event is also known as pinch event. It allows the user to use two fingers m
 		// do sth
 		
 	});
+
+## Custom build
+
+Toe.js is a modular library. In order you do not want to use all events just clone this repo and remove the unwanted gestures under src/gestures. The grunt script does the rest for you.
+	
+## Extensibility 
+
+Coming soon...
 
 ## Thanks
 
