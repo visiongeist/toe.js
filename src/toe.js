@@ -96,5 +96,14 @@ function registerSpecialEvent(eventName) {
 			setup: eventSetup,
 			teardown: eventTeardown
 		};
+	} else {
+		$.event.special.tap = {
+	            setup: function(data, namespaces) {
+	                $("body").on('click', function(e) { $(e.target).trigger('tap'); });
+	            },
+	            teardown: function(namespace) {
+	                $("body").off('click');
+	            }
+	        }
 	}
 }
