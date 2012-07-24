@@ -96,5 +96,20 @@ function registerSpecialEvent(eventName) {
 			setup: eventSetup,
 			teardown: eventTeardown
 		};
+	} else {
+		$.event.special.tap = {
+			setup: function(data, namespaces) {
+				$(this).on('click', $.event.special.tap.handler );
+			},
+			teardown: function(namespace) {
+				$(this).off('click', $.event.special.tap.handler);
+			},
+			handler: function(e) { 
+				// set correct event type
+				e.type = "tap";
+				// trigger tap handlers
+				$.event.handle.apply( this, arguments ); 
+			}
+	        }
 	}
 }
