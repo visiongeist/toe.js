@@ -211,7 +211,7 @@ gestures.exec = function (timing, event) {
 };
 /*!
  * toe.js
- * version 1.1
+ * version 1.2
  * author: Damien Antipa
  * https://github.com/dantipa/toe.js
  */
@@ -438,15 +438,13 @@ function registerSpecialEvent(eventName) {
 
         holdTimer = setTimeout(function() {
             if (state.touches.start && !state.touches.end) { // touch event already completed
-                return;
-            }
+                distance = state.touches.move ? calc.getDistance(state.touches.start[0], state.touches.move[0]) : 0;
 
-            distance = state.touches.move ? calc.getDistance(state.touches.start[0], state.touches.move[0]) : 0;
-
-            if (distance < config.tap_max_distance && state.gesture === 'taphold') {
-                $(event.target).trigger($.Event('taphold', {
-                    originalEvent: state.events.start ? state.events.start.originalEvent : event.originalEvent
-                }));
+                if (distance < config.tap_max_distance && state.gesture === 'taphold') {
+                    $(event.target).trigger($.Event('taphold', {
+                        originalEvent: state.events.start ? state.events.start.originalEvent : event.originalEvent
+                    }));
+                }
             }
         }, config.hold_timeout);
 
