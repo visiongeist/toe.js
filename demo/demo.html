@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demo: toe.js</title>
+    <script src="../lib/jquery.min.js"></script>
+    <script src="../dist/toe.min.js"></script>
+    <style>
+        #swipeme {
+            border: 3px dashed orange;
+            line-height: 300px;
+            height: 300px;
+            text-align: center;
+            font-size: 3em;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="swipeme">
+        Touch me :)
+    </div>
+    <div id="output">
+    </div>
+    <script>
+        (function ($) {
+            var $sw = $('#swipeme'),
+                    $output = $('#output');
+
+            $sw.on('touchstart touchmove touchend', function (event) {
+                event.preventDefault();
+            });
+
+            $sw.on('taphold tap doubletap swipe transformstart transform transformend', function (event) {
+                event.preventDefault();
+
+                $output.prepend("Type: " + event.type + "<br/>");
+            });
+
+        }(jQuery));
+    </script>
+</body>
+</html>
