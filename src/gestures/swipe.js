@@ -29,7 +29,8 @@
             state.gesture = 'swipe';
             $(event.target).trigger($.Event('swipe', {
                 originalEvent   : event.originalEvent,
-                direction       : direction
+                direction       : direction,
+                touches         : $.extend(true, {}, state.touches)
             }));
         }
     }

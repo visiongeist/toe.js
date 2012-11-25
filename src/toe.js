@@ -1,10 +1,10 @@
 /*!
  * toe.js
- * version 1.2
+ * version 1.2.1
  * author: Damien Antipa
  * https://github.com/dantipa/toe.js
  */
-var isTouch = !!('ontouchstart' in window),
+var isTouch = 'ontouchstart' in window,
     $proxyStart, $proxyMove, $proxyEnd;
 
 /**

@@ -13,7 +13,7 @@ module.exports = function(grunt) {
                     'src/gestures/*.js',
                     'build/outro.js'
                 ],
-                dest: 'dist/toe.built.js'
+                dest: 'dist/toe.js'
             }
         },
         lint: {
