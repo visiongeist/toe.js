@@ -312,41 +312,81 @@ function registerSpecialEvent(eventName) {
 (function (gestures, state, calc) {
 
     var config = {
-            swipe_time: 300,
-            swipe_min_distance: 30
-        };
+            scale_treshold     : 0.1,
+            rotation_treshold  : 15 // °
+        },
+        started = false,
+        center;
 
     /**
      *
      * @param {jQuery.Event} event
-        */
-    function swipe(event)
+     */
+    function transform(event)
     {
-        var duration = new Date().getTime() - state.timestamp,
-            angle,
-            direction,
-            distance;
+        var rotation,
+            scale,
+            $target = $(event.target);
 
-        if(!state.touches.move) {
+        if(state.touches.move.length !== 2) {
             return;
         }
 
-        distance = calc.getDistance(state.touches.start[0], state.touches.move[0]);
-        if((config.swipe_time > duration) && (distance > config.swipe_min_distance)) {
+        rotation = calc.getRotation(state.touches.start, state.touches.move);
+        scale = calc.getScale(state.touches.start, state.touches.move);
 
-            angle = calc.getAngle(state.touches.start[0], state.touches.move[0]);
-            direction = calc.getDirection(angle);
+        if(state.gesture === 'transform' || Math.abs(1-scale) > config.scale_treshold || Math.abs(rotation) > config.rotation_treshold) {
+            state.gesture = 'transform';
 
-            state.gesture = 'swipe';
-            $(event.target).trigger($.Event('swipe', {
-                originalEvent   : event.originalEvent,
-                direction       : direction,
-                touches         : $.extend(true, {}, state.touches)
+            center = {  pageX: ((state.touches.move[0].pageX + state.touches.move[1].pageX) / 2) - state.offset.left,
+                pageY: ((state.touches.move[0].pageY + state.touches.move[1].pageY) / 2) - state.offset.top };
+
+            if(!started) {
+                $target.trigger($.Event('transformstart', {
+                    originalEvent: event.originalEvent,
+                    center: center,
+                    scale: scale,
+                    rotation: rotation
+                }));
+                started = true;
+            }
+
+            $target.trigger($.Event('transform', {
+                originalEvent: event.originalEvent,
+                center: center,
+                scale: scale,
+                rotation: rotation
             }));
         }
     }
 
-    gestures.add('end', 'swipe', swipe);
+    /**
+     *
+     * @param {jQuery.Event} event
+     */
+    function transformend(event)
+    {
+        var rotation,
+            scale,
+            $target = $(event.target);
+
+        if(state.gesture === 'transform') {
+            rotation = calc.getRotation(state.touches.start, state.touches.move);
+            scale = calc.getScale(state.touches.start, state.touches.move);
+
+            $target.trigger($.Event('transformend', {
+                originalEvent: event.originalEvent,
+                center: center,
+                scale: scale,
+                rotation: rotation
+            }));
+
+            started = false;
+        }
+    }
+
+    gestures.add('move', 'transform', transform);
+    gestures.add('end', 'transformend', transformend);
 
 }(gestures, state, calc));
 (function (gestures, state, calc, util) {
@@ -459,81 +499,41 @@ function registerSpecialEvent(eventName) {
 (function (gestures, state, calc) {
 
     var config = {
-            scale_treshold     : 0.1,
-            rotation_treshold  : 15 // °
-        },
-        started = false,
-        center;
+            swipe_time: 300,
+            swipe_min_distance: 30
+        };
 
     /**
      *
      * @param {jQuery.Event} event
-     */
-    function transform(event)
+        */
+    function swipe(event)
     {
-        var rotation,
-            scale,
-            $target = $(event.target);
+        var duration = new Date().getTime() - state.timestamp,
+            angle,
+            direction,
+            distance;
 
-        if(state.touches.move.length !== 2) {
+        if(!state.touches.move) {
             return;
         }
 
-        rotation = calc.getRotation(state.touches.start, state.touches.move);
-        scale = calc.getScale(state.touches.start, state.touches.move);
+        distance = calc.getDistance(state.touches.start[0], state.touches.move[0]);
+        if((config.swipe_time > duration) && (distance > config.swipe_min_distance)) {
 
-        if(state.gesture === 'transform' || Math.abs(1-scale) > config.scale_treshold || Math.abs(rotation) > config.rotation_treshold) {
-            state.gesture = 'transform';
+            angle = calc.getAngle(state.touches.start[0], state.touches.move[0]);
+            direction = calc.getDirection(angle);
 
-            center = {  pageX: ((state.touches.move[0].pageX + state.touches.move[1].pageX) / 2) - state.offset.left,
-                pageY: ((state.touches.move[0].pageY + state.touches.move[1].pageY) / 2) - state.offset.top };
-
-            if(!started) {
-                $target.trigger($.Event('transformstart', {
-                    originalEvent: event.originalEvent,
-                    center: center,
-                    scale: scale,
-                    rotation: rotation
-                }));
-                started = true;
-            }
-
-            $target.trigger($.Event('transform', {
-                originalEvent: event.originalEvent,
-                center: center,
-                scale: scale,
-                rotation: rotation
+            state.gesture = 'swipe';
+            $(event.target).trigger($.Event('swipe', {
+                originalEvent   : event.originalEvent,
+                direction       : direction,
+                touches         : $.extend(true, {}, state.touches)
             }));
         }
     }
 
-    /**
-     *
-     * @param {jQuery.Event} event
-     */
-    function transformend(event)
-    {
-        var rotation,
-            scale,
-            $target = $(event.target);
-
-        if(state.gesture === 'transform') {
-            rotation = calc.getRotation(state.touches.start, state.touches.move);
-            scale = calc.getScale(state.touches.start, state.touches.move);
-
-            $target.trigger($.Event('transformend', {
-                originalEvent: event.originalEvent,
-                center: center,
-                scale: scale,
-                rotation: rotation
-            }));
-
-            started = false;
-        }
-    }
-
-    gestures.add('move', 'transform', transform);
-    gestures.add('end', 'transformend', transformend);
+    gestures.add('end', 'swipe', swipe);
 
 }(gestures, state, calc));
 }(jQuery, window));

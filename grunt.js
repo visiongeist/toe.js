@@ -17,7 +17,7 @@ module.exports = function(grunt) {
             }
         },
         lint: {
-            files: ['dist/toe.built.js']
+            files: ['dist/toe.js']
         },
         jshint: {
             options: {
@@ -38,7 +38,7 @@ module.exports = function(grunt) {
         },
         min: {
             dist: {
-                src: ['dist/toe.built.js'],
+                src: ['dist/toe.js'],
                 dest: 'dist/toe.min.js'
             }
         }
