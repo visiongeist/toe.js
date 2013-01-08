@@ -10,12 +10,12 @@ var util = {};
  * @return {TouchEvent[]}
  */
 util.getTouches = function (event) {
-    return event.originalEvent.touches.length > 0 ?
+    return (event.originalEvent && event.originalEvent.touches) ? event.originalEvent.touches.length > 0 ?
         $.extend(true, {}, event.originalEvent.touches) :
         (event.originalEvent.changedTouches.length > 0 ?
             $.extend(true, {}, event.originalEvent.changedTouches) :
             []
-            );
+            ) : [];
 };
 
 /**
