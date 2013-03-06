@@ -1,40 +1,44 @@
-(function (gestures, state, calc) {
+(function ($, touch, window, undefined) {
 
-    var config = {
-            swipe_time: 300,
-            swipe_min_distance: 30
-        };
+    $.event.special.swipe = (function () {
 
-    /**
-     *
-     * @param {jQuery.Event} event
-        */
-    function swipe(event)
-    {
-        var duration = new Date().getTime() - state.timestamp,
-            angle,
-            direction,
-            distance;
+        var cfg = {
+                distance: 40, // minimum
+                duration: 300, // maximum
+                direction: 'all',
+                finger: 1
+            };
 
-        if(!state.touches.move) {
-            return;
-        }
+        return touch.track({
+            touchstart: function (event, state, start) {
+                state.finger = state.start.point.length;
+            },
+            touchmove: function (event, state, move) {
+                // if another finger was used then increment the amount of fingers used
+                state.finger = move.point.length > state.finger ? move.point.length : state.finger;
+            },
+            touchend: function (event, state, end) {
+                var opt = $.extend(cfg, event.data), 
+                    duration,
+                    distance;
 
-        distance = calc.getDistance(state.touches.start[0], state.touches.move[0]);
-        if((config.swipe_time > duration) && (distance > config.swipe_min_distance)) {
+                // calc
+                duration = touch.calc.getDuration(state.start, end);
+                distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
 
-            angle = calc.getAngle(state.touches.start[0], state.touches.move[0]);
-            direction = calc.getDirection(angle);
+                // check if the swipe was valid
+                if (duration < opt.duration && distance > opt.distance) {
 
-            state.gesture = 'swipe';
-            $(event.target).trigger($.Event('swipe', {
-                originalEvent   : event.originalEvent,
-                direction       : direction,
-                touches         : $.extend(true, {}, state.touches)
-            }));
-        }
-    }
+                    state.angle = touch.calc.getAngle(state.start.point[0], end.point[0]);
+                    state.direction = touch.calc.getDirection(state.angle);
 
-    gestures.add('end', 'swipe', swipe);
+                    // fire if the amount of fingers match
+                    if (state.finger === opt.finger && (opt.direction === 'all' || state.direction === opt.direction)) {
+                        $(event.target).trigger($.Event('swipe', state));
+                    }
+                }
+            }
+        });
+    }());
 
-}(gestures, state, calc));
+}(jQuery, jQuery.toe, this));

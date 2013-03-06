@@ -1,80 +1,56 @@
-(function (gestures, state, calc) {
+(function ($, touch, window, undefined) {
 
-    var config = {
-            scale_treshold     : 0.1,
-            rotation_treshold  : 15 // °
-        },
-        started = false,
-        center;
+    $.event.special.transform = (function () {
 
-    /**
-     *
-     * @param {jQuery.Event} event
-     */
-    function transform(event)
-    {
-        var rotation,
-            scale,
-            $target = $(event.target);
+        var cfg = {
+                scale: 0.1, // minimum
+                rotation: 15
+            },
+            started;
 
-        if(state.touches.move.length !== 2) {
-            return;
-        }
+        return touch.track({
+            touchstart: function (event, state, start) {
+                started = false;
+            },
+            touchmove: function (event, state, move) {
+                var opt = $.extend(cfg, event.data);
+                
+                if (move.point.length !== 2) {
+                    state.move.pop();
+                    return;
+                }
 
-        rotation = calc.getRotation(state.touches.start, state.touches.move);
-        scale = calc.getScale(state.touches.start, state.touches.move);
+                if (state.start.point.length !== 2 && move.point.length === 2) { // in case the user failed to start with 2 fingers
+                    state.start = $.extend({}, move);
+                }
 
-        if(state.gesture === 'transform' || Math.abs(1-scale) > config.scale_treshold || Math.abs(rotation) > config.rotation_treshold) {
-            state.gesture = 'transform';
+                state.rotation = touch.calc.getRotation(state.start, move);
+                state.scale = touch.calc.getScale(state.start, move);
 
-            center = {  pageX: ((state.touches.move[0].pageX + state.touches.move[1].pageX) / 2) - state.offset.left,
-                pageY: ((state.touches.move[0].pageY + state.touches.move[1].pageY) / 2) - state.offset.top };
+                if (Math.abs(1-state.scale) > opt.scale || Math.abs(state.rotation) > opt.rotation) {
+                    if(!started) {
+                        $(event.target).trigger($.Event('transformstart', state));
+                        started = true;
+                    }
 
-            if(!started) {
-                $target.trigger($.Event('transformstart', {
-                    originalEvent: event.originalEvent,
-                    center: center,
-                    scale: scale,
-                    rotation: rotation
-                }));
-                started = true;
+                    $(event.target).trigger($.Event('transform', state));
+                }
+            },
+            touchend: function (event, state, end) {
+                if(started) {
+                    started = false;
+
+                    if (end.point.length !== 2) { // in case the user failed to start with 2 fingers
+                        state.end = $.extend({}, state.move[state.move.length - 1]);
+                    }
+
+                    state.rotation = touch.calc.getRotation(state.start, state.end);
+                    state.scale = touch.calc.getScale(state.start, state.end);
+
+                    $(event.target).trigger($.Event('transformend', state));
+                }
             }
+        });
+    }());
 
-            $target.trigger($.Event('transform', {
-                originalEvent: event.originalEvent,
-                center: center,
-                scale: scale,
-                rotation: rotation
-            }));
-        }
-    }
-
-    /**
-     *
-     * @param {jQuery.Event} event
-     */
-    function transformend(event)
-    {
-        var rotation,
-            scale,
-            $target = $(event.target);
-
-        if(state.gesture === 'transform') {
-            rotation = calc.getRotation(state.touches.start, state.touches.move);
-            scale = calc.getScale(state.touches.start, state.touches.move);
-
-            $target.trigger($.Event('transformend', {
-                originalEvent: event.originalEvent,
-                center: center,
-                scale: scale,
-                rotation: rotation
-            }));
-
-            started = false;
-        }
-    }
-
-    gestures.add('move', 'transform', transform);
-    gestures.add('end', 'transformend', transformend);
-
-}(gestures, state, calc));
+}(jQuery, jQuery.toe, this));

@@ -1,100 +1,128 @@
 /*!
  * toe.js
- * version 1.2.1
+ * version 2.0.0
  * author: Damien Antipa
  * https://github.com/dantipa/toe.js
  */
-var isTouch = 'ontouchstart' in window,
-    $proxyStart, $proxyMove, $proxyEnd;
 
-/**
- *
- * @param {jQuery.Event} event
- */
-function touchstart(event) {
-    var $target = $(event.target);
+ (function ($, window, undefined) {
 
-    state.clearState();
+    var touch = {
 
-    state.touches.start = util.getTouches(event);
-    state.events.start = event;
-    state.timestamp = new Date().getTime();
+        Event: function (event) {
+            var normalizedEvent = {
+                timestamp: new Date().getTime(),
+                target: event.target,
+                point: []
+            }, points = event.changedTouches || 
+                        event.originalEvent.changedTouches || 
+                        event.touches || 
+                        event.originalEvent.touches;
 
-    state.events.start = event;
+            $.each(points, function (i, e) {
+                normalizedEvent.point.push({
+                    x: e.pageX,
+                    y: e.pageY
+                });
+            });
 
-    state.offset = $target.offset();
+            return normalizedEvent;
+        },
 
-    gestures.exec('start', event);
-}
+        State: function (start) {
+            var p = start.point[0];
 
-/**
- *
- * @param {jQuery.Event} event
- */
-function touchmove(event) {
-    if(!state.timestamp) {
-        return;
-    }
+            return {
+                start: start,
+                move: [],
+                end: null,
+                pageX: p.x,
+                pageY: p.y
+            };
+        },
 
-    state.touches.move = util.getTouches(event);
-    state.events.move = event;
+        track: function (gesture) {
+            var state,
+                touchstart = function (event) {
+                    var start = touch.Event(event);
+                    state = touch.State(start); // create a new State object and add start event
 
-    gestures.exec('move', event);
-}
+                    gesture.touchstart(event, state, start);
+                },
+                touchmove = function (event) {
+                    var move = touch.Event(event);
+                    state.move.push(move);
 
-/**
- *
- * @param {jQuery.Event} event
- */
-function touchend(event) {
-    if(!state.timestamp) {
-        return;
-    }
+                    gesture.touchmove(event, state, move);
+                },
+                touchend = function (event) {
+                    var end = touch.Event(event);
+                    state.end = end;
 
-    state.touches.end = util.getTouches(event);
-    state.events.end = event;
+                    gesture.touchend(event, state, end);
+                };
 
-    gestures.exec('end', event);
+            gesture.setup = function (data, namespaces, eventHandle) {
+                $(this).on('touchstart', data, touchstart)
+                    .on('touchmove', data, touchmove)
+                    .on('touchend touchcancel', data, touchend);
+            };
 
-    state.prevGesture = state.gesture;
-    state.clearState();
-}
+            gesture.teardown = function () {
+                $(this).off('touchstart', touchstart)
+                    .off('touchmove', touchmove)
+                    .off('touchend touchcancel', touchend);
+            };
 
-$proxyStart = $.proxy(touchstart, this);
-$proxyMove = $.proxy(touchmove, this);
-$proxyEnd = $.proxy(touchend, this);
+            return gesture;
+        },
 
-function eventSetup(data, namespaces, eventHandler) {
-    var $this = $(this),
-        toe = $this.data('toe') || 0;
+        calc: {
+            getDuration: function (start, end) {
+                return end.timestamp - start.timestamp;
+            },
 
-    if (toe === 0) {
-        $this.on('touchstart', $proxyStart);
-        $this.on('touchmove', $proxyMove);
-        $this.on('touchend touchcancel', $proxyEnd);
-    }
+            getDistance: function (start, end) {
+                return Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+            },
 
-    $this.data('toe', ++toe);
-}
+            getAngle: function (start, end) {
+                return Math.atan2(end.y - start.y, end.x - start.x) * 180 / Math.PI;
+            },
 
-function eventTeardown(namespace) {
-    var $this = $(this),
-        toe = $this.data('toe') || 0;
+            getDirection: function (angle) {
+                return angle < -45 && angle > -135 ? 'top':
+                    angle >= -45 && angle <= 45 ? 'right':
+                    angle >= 45 && angle < 135 ? 'down':
+                    angle >= 135 || angle <= -135 ? 'left':
+                    'unknown';
+            },
 
-    $this.data('toe', --toe);
+            getScale: function (start, move) {
+                var sp = start.point,
+                    mp = move.point;
 
-    if (toe === 0) {
-        $this.off('touchstart', $proxyStart);
-        $this.off('touchmove', $proxyMove);
-        $this.off('touchend touchcancel', $proxyEnd);
-    }
-}
+                if(sp.length === 2 && mp.length === 2) { // needs to have the position of two fingers
+                    return (Math.sqrt(Math.pow(mp[0].x - mp[1].x, 2) + Math.pow(mp[0].y - mp[1].y, 2)) / Math.sqrt(Math.pow(sp[0].x - sp[1].x, 2) + Math.pow(sp[0].y - sp[1].y, 2))).toFixed(2);
+                }
 
-function registerSpecialEvent(eventName) {
-	if (isTouch) { // event binding will just work on touch devices
-		$.event.special[eventName] = {
-			setup: eventSetup,
-			teardown: eventTeardown
-		};
-	}
-}
+                return 0;
+            },
+
+            getRotation: function (start, move) {
+                var sp = start.point,
+                    mp = move.point;
+
+                if(sp.length === 2 && mp.length === 2) {
+                    return ((Math.atan2(mp[0].y - mp[1].y, mp[0].x - mp[1].x) * 180 / Math.PI) - (Math.atan2(sp[0].y - sp[1].y, sp[0].x - sp[1].x) * 180 / Math.PI)).toFixed(2);
+                }
+
+                return 0;
+            }
+        }
+    };
+
+    // add to namespace
+    $.toe = touch;
+
+ }(jQuery, this));
