@@ -30,12 +30,14 @@
         },
 
         State: function (start) {
+            var p = start.point[0];
+
             return {
                 start: start,
                 move: [],
                 end: null,
-                pageX: start.point[0].x,
-                pageY: start.point[0].y
+                pageX: p.x,
+                pageY: p.y
             };
         },
 

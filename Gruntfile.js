@@ -1,7 +1,5 @@
 module.exports = function(grunt) {
 
-    debugger;
-
     grunt.initConfig({
         concat: {
             dist: {
