@@ -11,10 +11,9 @@ The goal of toe.js is
 * Customizable through [grunt](https://github.com/cowboy/grunt). The build process allows you to remove not needed gestures
 * Tiny overhead (1649 bytes gzipped by version 1.0)
 
-## Available events (v. 1.0)
+## Available events (v. 2.0)
 
 * tap
-* doubletap (Attention: If you bind doubletap AND tap to the same element then the tap event will be called deferred)
 * taphold
 * swipe (all directions)
 * transformstart, transform, transformend (scale and rotation)
@@ -26,12 +25,6 @@ Coming soon: fancy drag and drop
 Use the default jQuery event binding to bind a toe.js event
 	
 	$('div.myElem').on('tap', $.noop);
-	
-Like all jQuery events tap will provide you the original event fired by the browser.
-
-	$('div.myElem').on('tap', function (event) {
-		var original = event.originalEvent;
-	});
 	
 Most of the events support multiple fingers. So if you want to find out the amount of fingers used by a gesture, just look into the TouchList of the original event.
 
@@ -60,7 +53,7 @@ How to extend toe.js? I'll provide a simple template as soon as possible!
 
 ### tap, doubletap, taphold
 
-The "tap" event is somehow similar to a click event with a pointer device so there is nothing more to say about it. "doubletap" is the touch equivalent for double click. If there two taps in a short time period then the "doubletap" event is triggered (Attention: If you bind "doubletap" AND "tap" to the same element then the "tap" event will be called deferred)
+The "tap" event is somehow similar to a click event with a pointer device so there is nothing more to say about it. 
 "taphold" is triggered if the user starts touching the target and keeps his finger on it for a certain amount of time (default: 500ms)
 
 ### swipe
@@ -91,9 +84,8 @@ This event is also known as pinch event. It allows the user to use two fingers m
 
 Toe.js is a modular library. In order you do not want to use all events just clone this repo and remove the unwanted gestures under src/gestures. The grunt script does the rest for you.
 	
-## Extensibility 
-
-Coming soon...
+## More information
+(blog entry)[http://damien.antipa.at/2013/03/24/toe-js-version-2-was-released/]
 
 ## Thanks
 
