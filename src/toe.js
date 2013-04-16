@@ -1,6 +1,6 @@
 /*!
  * toe.js
- * version 2.0.0
+ * version 2.0.1
  * author: Damien Antipa
  * https://github.com/dantipa/toe.js
  */
@@ -47,19 +47,19 @@
                     var start = touch.Event(event);
                     state = touch.State(start); // create a new State object and add start event
 
-                    gesture.touchstart(event, state, start);
+                    gesture.touchstart.call(this, event, state, start);
                 },
                 touchmove = function (event) {
                     var move = touch.Event(event);
                     state.move.push(move);
 
-                    gesture.touchmove(event, state, move);
+                    gesture.touchmove.call(this, event, state, move);
                 },
                 touchend = function (event) {
                     var end = touch.Event(event);
                     state.end = end;
 
-                    gesture.touchend(event, state, end);
+                    gesture.touchend.call(this, event, state, end);
                 };
 
             gesture.setup = function (data, namespaces, eventHandle) {

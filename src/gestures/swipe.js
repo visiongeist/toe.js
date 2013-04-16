@@ -34,7 +34,7 @@
 
                     // fire if the amount of fingers match
                     if (state.finger === opt.finger && (opt.direction === 'all' || state.direction === opt.direction)) {
-                        $(event.target).trigger($.Event('swipe', state));
+                        $(this).trigger($.Event('swipe', state));
                     }
                 }
             }

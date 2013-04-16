@@ -21,7 +21,7 @@
                 timer = setTimeout(function () {
                     if (!abort) { 
                         if (state.finger === opt.finger) {
-                            $(event.target).trigger($.Event('taphold', state));
+                            $(this).trigger($.Event('taphold', state));
                         }
                     }
                 }, opt.duration);

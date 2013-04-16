@@ -29,7 +29,7 @@
                 if (duration < opt.duration && distance < opt.distance) {
                     // fire if the amount of fingers match
                     if (state.finger === opt.finger) {
-                        $(event.target).trigger($.Event('tap', state));
+                        $(this).trigger($.Event('tap', state));
                     }
                 }
             }

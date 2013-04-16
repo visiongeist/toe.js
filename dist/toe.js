@@ -1,6 +1,6 @@
 /*!
  * toe.js
- * version 2.0.0
+ * version 2.0.1
  * author: Damien Antipa
  * https://github.com/dantipa/toe.js
  */
@@ -47,19 +47,19 @@
                     var start = touch.Event(event);
                     state = touch.State(start); // create a new State object and add start event
 
-                    gesture.touchstart(event, state, start);
+                    gesture.touchstart.call(this, event, state, start);
                 },
                 touchmove = function (event) {
                     var move = touch.Event(event);
                     state.move.push(move);
 
-                    gesture.touchmove(event, state, move);
+                    gesture.touchmove.call(this, event, state, move);
                 },
                 touchend = function (event) {
                     var end = touch.Event(event);
                     state.end = end;
 
-                    gesture.touchend(event, state, end);
+                    gesture.touchend.call(this, event, state, end);
                 };
 
             gesture.setup = function (data, namespaces, eventHandle) {
@@ -162,7 +162,7 @@
 
                     // fire if the amount of fingers match
                     if (state.finger === opt.finger && (opt.direction === 'all' || state.direction === opt.direction)) {
-                        $(event.target).trigger($.Event('swipe', state));
+                        $(this).trigger($.Event('swipe', state));
                     }
                 }
             }
@@ -201,7 +201,7 @@
                 if (duration < opt.duration && distance < opt.distance) {
                     // fire if the amount of fingers match
                     if (state.finger === opt.finger) {
-                        $(event.target).trigger($.Event('tap', state));
+                        $(this).trigger($.Event('tap', state));
                     }
                 }
             }
@@ -232,7 +232,7 @@
                 timer = setTimeout(function () {
                     if (!abort) { 
                         if (state.finger === opt.finger) {
-                            $(event.target).trigger($.Event('taphold', state));
+                            $(this).trigger($.Event('taphold', state));
                         }
                     }
                 }, opt.duration);
@@ -289,11 +289,11 @@
 
                 if (Math.abs(1-state.scale) > opt.scale || Math.abs(state.rotation) > opt.rotation) {
                     if(!started) {
-                        $(event.target).trigger($.Event('transformstart', state));
+                        $(this).trigger($.Event('transformstart', state));
                         started = true;
                     }
 
-                    $(event.target).trigger($.Event('transform', state));
+                    $(this).trigger($.Event('transform', state));
                 }
             },
             touchend: function (event, state, end) {
@@ -307,7 +307,7 @@
                     state.rotation = touch.calc.getRotation(state.start, state.end);
                     state.scale = touch.calc.getScale(state.start, state.end);
 
-                    $(event.target).trigger($.Event('transformend', state));
+                    $(this).trigger($.Event('transformend', state));
                 }
             }
         });
