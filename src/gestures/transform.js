@@ -29,11 +29,11 @@
 
                 if (Math.abs(1-state.scale) > opt.scale || Math.abs(state.rotation) > opt.rotation) {
                     if(!started) {
-                        $(this).trigger($.Event('transformstart', state));
+                        $(event.target).trigger($.Event('transformstart', state));
                         started = true;
                     }
 
-                    $(this).trigger($.Event('transform', state));
+                    $(event.target).trigger($.Event('transform', state));
                 }
             },
             touchend: function (event, state, end) {
@@ -47,7 +47,7 @@
                     state.rotation = touch.calc.getRotation(state.start, state.end);
                     state.scale = touch.calc.getScale(state.start, state.end);
 
-                    $(this).trigger($.Event('transformend', state));
+                    $(event.target).trigger($.Event('transformend', state));
                 }
             }
         });
