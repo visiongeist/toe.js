@@ -162,7 +162,7 @@
 
                     // fire if the amount of fingers match
                     if (state.finger === opt.finger && (opt.direction === 'all' || state.direction === opt.direction)) {
-                        $(this).trigger($.Event('swipe', state));
+                        $(event.target).trigger($.Event('swipe', state));
                     }
                 }
             }
@@ -170,6 +170,7 @@
     }());
 
 }(jQuery, jQuery.toe, this));
+
 (function ($, touch, window, undefined) {
 
     $.event.special.tap = (function () {
@@ -201,7 +202,7 @@
                 if (duration < opt.duration && distance < opt.distance) {
                     // fire if the amount of fingers match
                     if (state.finger === opt.finger) {
-                        $(this).trigger($.Event('tap', state));
+                        $(event.target).trigger($.Event('tap', state));
                     }
                 }
             }
@@ -209,6 +210,7 @@
     }());
 
 }(jQuery, jQuery.toe, this));
+
 (function ($, touch, window, undefined) {
 
     $.event.special.taphold = (function () {
@@ -232,7 +234,7 @@
                 timer = setTimeout(function () {
                     if (!abort) { 
                         if (state.finger === opt.finger) {
-                            $(this).trigger($.Event('taphold', state));
+                            $(event.target).trigger($.Event('taphold', state));
                         }
                     }
                 }, opt.duration);
@@ -258,6 +260,7 @@
     }());
 
 }(jQuery, jQuery.toe, this));
+
 (function ($, touch, window, undefined) {
 
     $.event.special.transform = (function () {
@@ -289,11 +292,11 @@
 
                 if (Math.abs(1-state.scale) > opt.scale || Math.abs(state.rotation) > opt.rotation) {
                     if(!started) {
-                        $(this).trigger($.Event('transformstart', state));
+                        $(event.target).trigger($.Event('transformstart', state));
                         started = true;
                     }
 
-                    $(this).trigger($.Event('transform', state));
+                    $(event.target).trigger($.Event('transform', state));
                 }
             },
             touchend: function (event, state, end) {
@@ -307,7 +310,7 @@
                     state.rotation = touch.calc.getRotation(state.start, state.end);
                     state.scale = touch.calc.getScale(state.start, state.end);
 
-                    $(this).trigger($.Event('transformend', state));
+                    $(event.target).trigger($.Event('transformend', state));
                 }
             }
         });
