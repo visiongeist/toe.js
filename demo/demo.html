@@ -3,6 +3,7 @@
 <head>
     <title>Demo: toe.js</title>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script src="http://jsconsole.com/remote.js?DC118DD5-39EB-42F5-8E78-23FCBA4EEA9E"></script>
     <script src="toe.js"></script>
     <style>
         #swipeme {
@@ -30,7 +31,7 @@
 
             $sw.on('taphold tap doubletap swipe transformstart transform transformend', function (event) {
                 event.preventDefault();
-                $output.prepend("Type: " + event.type + " on " + event.target.id + "<br/>");
+                $output.prepend("Type: " + event.type + " on " + event.target + "#" + event.target.id + "<br/>");
             });
 
 						$sw.append('<div id="swipeme"><p id="p"><span id="touch">Touch</span> <span id="me">me</span> :)</p></div>');
