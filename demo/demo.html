@@ -3,7 +3,7 @@
 <head>
     <title>Demo: toe.js</title>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="../dist/toe.js"></script>
+    <script src="toe.js"></script>
     <style>
         #swipeme {
             border: 3px dashed orange;
@@ -16,14 +16,12 @@
     </style>
 </head>
 <body>
-    <div id="swipeme">
-        Touch me :)
-    </div>
+		<div id="swipecontainer"></div>
     <div id="output">
     </div>
     <script>
         (function ($) {
-            var $sw = $('#swipeme'),
+            var $sw = $('#swipecontainer'),
                     $output = $('#output');
 
             $sw.on('touchstart touchmove touchend', function (event) {
@@ -32,9 +30,10 @@
 
             $sw.on('taphold tap doubletap swipe transformstart transform transformend', function (event) {
                 event.preventDefault();
-
-                $output.prepend("Type: " + event.type + "<br/>");
+                $output.prepend("Type: " + event.type + " on " + event.target.id + "<br/>");
             });
+
+						$sw.append('<div id="swipeme"><p id="p"><span id="touch">Touch</span> <span id="me">me</span> :)</p></div>');
 
         }(jQuery));
     </script>
