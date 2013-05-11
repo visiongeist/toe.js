@@ -1,23 +1,52 @@
 /*!
- * toe.js
- * version 2.0.1
- * author: Damien Antipa
- * https://github.com/dantipa/toe.js
- */
+* toe.js
+* version 3.0.0
+* author: Damien Antipa
+* https://github.com/dantipa/toe.js
+*/
+(function ($, window, undefined) {
 
- (function ($, window, undefined) {
+    var state, gestures = {}, touch = {
 
-    var touch = {
+        on: function() {
+            $(document).on('touchstart', touchstart)
+                .on('touchmove', touchmove)
+                .on('touchend touchcancel', touchend);
+        },
 
-        Event: function (event) {
+        off: function() {
+            $(document).off('touchstart', touchstart)
+                .off('touchmove', touchmove)
+                .off('touchend touchcancel', touchend);
+        },
+
+        track: function (namespace, gesture) {
+            gestures[namespace] = gesture;
+        },
+
+        addEventParam: function (event, extra) {
+            var $t = $(event.target),
+                pos = $t.offset(),
+                param = {
+                    pageX: event.point[0].x,
+                    pageY: event.point[0].y,
+                    offsetX: pos.left - event.point[0].x,
+                    offsetY: pos.top - event.point[0].y
+                };
+
+            return $.extend(param, extra);
+        },
+
+        Event: function (event) { // normalizes and simplifies the event object
             var normalizedEvent = {
+                type: event.type,
                 timestamp: new Date().getTime(),
-                target: event.target,
+                target: event.target,   // target is always consistent through start, move, end
                 point: []
-            }, points = event.changedTouches || 
-                        event.originalEvent.changedTouches || 
-                        event.touches || 
-                        event.originalEvent.touches;
+            }, points = event.changedTouches ||
+                event.originalEvent.changedTouches ||
+                event.touches ||
+                event.originalEvent.touches;
 
             $.each(points, function (i, e) {
                 normalizedEvent.point.push({
@@ -32,49 +61,11 @@
         State: function (start) {
             var p = start.point[0];
 
-            return {
+            return {   // TODO add screenX etc.
                 start: start,
                 move: [],
-                end: null,
-                pageX: p.x,
-                pageY: p.y
+                end: null
             };
-        },
-
-        track: function (gesture) {
-            var state,
-                touchstart = function (event) {
-                    var start = touch.Event(event);
-                    state = touch.State(start); // create a new State object and add start event
-
-                    gesture.touchstart.call(this, event, state, start);
-                },
-                touchmove = function (event) {
-                    var move = touch.Event(event);
-                    state.move.push(move);
-
-                    gesture.touchmove.call(this, event, state, move);
-                },
-                touchend = function (event) {
-                    var end = touch.Event(event);
-                    state.end = end;
-
-                    gesture.touchend.call(this, event, state, end);
-                };
-
-            gesture.setup = function (data, namespaces, eventHandle) {
-                $(this).on('touchstart', data, touchstart)
-                    .on('touchmove', data, touchmove)
-                    .on('touchend touchcancel', data, touchend);
-            };
-
-            gesture.teardown = function () {
-                $(this).off('touchstart', touchstart)
-                    .off('touchmove', touchmove)
-                    .off('touchend touchcancel', touchend);
-            };
-
-            return gesture;
         },
 
         calc: {
@@ -93,9 +84,9 @@
             getDirection: function (angle) {
                 return angle < -45 && angle > -135 ? 'top':
                     angle >= -45 && angle <= 45 ? 'right':
-                    angle >= 45 && angle < 135 ? 'down':
-                    angle >= 135 || angle <= -135 ? 'left':
-                    'unknown';
+                        angle >= 45 && angle < 135 ? 'down':
+                            angle >= 135 || angle <= -135 ? 'left':
+                                'unknown';
             },
 
             getScale: function (start, move) {
@@ -120,197 +111,226 @@
                 return 0;
             }
         }
-    };
+
+    }; // touch obj
+
+    function loopHandler(type, event, state, point) {
+        $.each(gestures, function (i, g) {
+            g[type].call(this, event, state, point);
+        });
+    }
+
+    function touchstart(event) {
+        var start = touch.Event(event);
+        state = touch.State(start); // create a new State object and add start event
+
+        loopHandler('touchstart', event, state, start);
+    }
+
+    function touchmove(event) {
+        var move = touch.Event(event);
+        state.move.push(move);
+
+        loopHandler('touchmove', event, state, move);
+    }
+
+    function touchend(event) {
+        var end = touch.Event(event);
+        state.end = end;
+
+        loopHandler('touchend', event, state, end);
+    }
+
+    touch.on();
 
     // add to namespace
     $.toe = touch;
 
- }(jQuery, this));
+}(jQuery, this));
 (function ($, touch, window, undefined) {
 
-    $.event.special.swipe = (function () {
+    var namespace = 'swipe', cfg = {
+            distance: 40, // minimum
+            duration: 1200, // maximum
+            direction: 'all'
+        };
 
-        var cfg = {
-                distance: 40, // minimum
-                duration: 300, // maximum
-                direction: 'all',
-                finger: 1
+    touch.track(namespace, {
+        touchstart: function (event, state, start) {
+            state[namespace] = {
+                finger: start.point.length
             };
+        },
+        touchmove: function (event, state, move) {
+            // if another finger was used then increment the amount of fingers used
+            state[namespace].finger = move.point.length > state[namespace].finger ? move.point.length : state[namespace].finger;
+        },
+        touchend: function (event, state, end) {
+            var opt = $.extend(cfg, event.data),
+                duration,
+                distance;
 
-        return touch.track({
-            touchstart: function (event, state, start) {
-                state.finger = state.start.point.length;
-            },
-            touchmove: function (event, state, move) {
-                // if another finger was used then increment the amount of fingers used
-                state.finger = move.point.length > state.finger ? move.point.length : state.finger;
-            },
-            touchend: function (event, state, end) {
-                var opt = $.extend(cfg, event.data), 
-                    duration,
-                    distance;
+            // calc
+            duration = touch.calc.getDuration(state.start, end);
+            distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
 
-                // calc
-                duration = touch.calc.getDuration(state.start, end);
-                distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
+            // check if the swipe was valid
+            if (duration < opt.duration && distance > opt.distance) {
 
-                // check if the swipe was valid
-                if (duration < opt.duration && distance > opt.distance) {
+                state[namespace].angle = touch.calc.getAngle(state.start.point[0], end.point[0]);
+                state[namespace].direction = touch.calc.getDirection(state[namespace].angle);
 
-                    state.angle = touch.calc.getAngle(state.start.point[0], end.point[0]);
-                    state.direction = touch.calc.getDirection(state.angle);
-
-                    // fire if the amount of fingers match
-                    if (state.finger === opt.finger && (opt.direction === 'all' || state.direction === opt.direction)) {
-                        $(this).trigger($.Event('swipe', state));
-                    }
+                // fire if the amount of fingers match
+                if (opt.direction === 'all' || state[namespace].direction === opt.direction) {
+                    $(event.target).trigger($.Event(namespace, touch.addEventParam(state.start, state[namespace])));
                 }
             }
-        });
-    }());
+        }
+    });
 
 }(jQuery, jQuery.toe, this));
 (function ($, touch, window, undefined) {
 
-    $.event.special.tap = (function () {
+    var namespace = 'tap', cfg = {
+        distance: 10,
+        duration: 300,
+        finger: 1
+    };
 
-        var cfg = {
-                distance: 10,
-                duration: 300,
-                finger: 1
+    touch.track(namespace, {
+        touchstart: function (event, state, start) {
+            state[namespace] = {
+                finger: start.point.length
             };
+        },
+        touchmove: function (event, state, move) {
+            // if another finger was used then increment the amount of fingers used
+            state[namespace].finger = move.point.length > state[namespace].finger ? move.point.length : state[namespace].finger;
+        },
+        touchend: function (event, state, end) {
+            var opt = $.extend(cfg, event.data),
+                duration,
+                distance;
 
-        return touch.track({
-            touchstart: function (event, state, start) {
-                state.finger = start.point.length;
-            },
-            touchmove: function (event, state, move) {
-                // if another finger was used then increment the amount of fingers used
-                state.finger = move.point.length > state.finger ? move.point.length : state.finger;
-            },
-            touchend: function (event, state, end) {
-                var opt = $.extend(cfg, event.data), 
-                    duration,
-                    distance;
+            // calc
+            duration = touch.calc.getDuration(state.start, end);
+            distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
 
-                // calc
-                duration = touch.calc.getDuration(state.start, end);
-                distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
-
-                // check if the tap was valid
-                if (duration < opt.duration && distance < opt.distance) {
-                    // fire if the amount of fingers match
-                    if (state.finger === opt.finger) {
-                        $(this).trigger($.Event('tap', state));
-                    }
+            // check if the tap was valid
+            if (duration < opt.duration && distance < opt.distance) {
+                // fire if the amount of fingers match
+                if (state[namespace].finger === opt.finger) {
+                    $(event.target).trigger(
+                        $.Event(namespace, touch.addEventParam(state.start, state[namespace]))
+                    );
                 }
             }
-        });
-    }());
+        }
+    });
 
 }(jQuery, jQuery.toe, this));
 (function ($, touch, window, undefined) {
 
-    $.event.special.taphold = (function () {
+    var timer, abort,
+        namespace = 'taphold', cfg = {
+            distance: 20,
+            duration: 500,
+            finger: 1
+        };
 
-        var timer,
-            abort,
-            cfg = {
-                distance: 20,
-                duration: 500,
-                finger: 1
+    touch.track(namespace, {
+        touchstart: function (event, state, start) {
+            var opt = $.extend(cfg, event.data);
+
+            abort = false;
+            state[namespace] = {
+                finger: start.point.length
             };
 
-        return touch.track({
-            touchstart: function (event, state, start) {
-                var opt = $.extend(cfg, event.data);
-
-                abort = false;
-                state.finger = start.point.length;
-
-                clearTimeout(timer);
-                timer = setTimeout(function () {
-                    if (!abort) { 
-                        if (state.finger === opt.finger) {
-                            $(this).trigger($.Event('taphold', state));
-                        }
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                if (!abort) {
+                    if (state[namespace].finger === opt.finger) {
+                        $(event.target).trigger($.Event(namespace, touch.addEventParam(start, state[namespace])));
                     }
-                }, opt.duration);
-            },
-            touchmove: function (event, state, move) {
-                var opt = $.extend(cfg, event.data),
-                    distance;
-
-                // if another finger was used then increment the amount of fingers used
-                state.finger = move.point.length > state.finger ? move.point.length : state.finger;
-
-                // calc
-                distance = touch.calc.getDistance(state.start.point[0], move.point[0]);
-                if (distance > opt.distance) { // illegal move
-                    abort = true;
                 }
-            },
-            touchend: function (event, state, end) {
+            }, opt.duration);
+        },
+        touchmove: function (event, state, move) {
+            var opt = $.extend(cfg, event.data),
+                distance;
+
+            // if another finger was used then increment the amount of fingers used
+            state[namespace].finger = move.point.length > state[namespace].finger ? move.point.length : state[namespace].finger;
+
+            // calc
+            distance = touch.calc.getDistance(state.start.point[0], move.point[0]);
+            if (distance > opt.distance) { // illegal move
                 abort = true;
-                clearTimeout(timer);
             }
-        });
-    }());
+        },
+        touchend: function (event, state, end) {
+            abort = true;
+            clearTimeout(timer);
+        }
+    });
 
 }(jQuery, jQuery.toe, this));
 (function ($, touch, window, undefined) {
 
-    $.event.special.transform = (function () {
+    var namespace = 'transform', cfg = {
+            scale: 0.1, // minimum
+            rotation: 15
+        },
+        started;
 
-        var cfg = {
-                scale: 0.1, // minimum
-                rotation: 15
-            },
-            started;
+    touch.track(namespace, {
+        touchstart: function (event, state, start) {
+            started = false;
+            state[namespace] = {
+                start: start,
+                move: []
+            };
+        },
+        touchmove: function (event, state, move) {
+            var opt = $.extend(cfg, event.data);
 
-        return touch.track({
-            touchstart: function (event, state, start) {
-                started = false;
-            },
-            touchmove: function (event, state, move) {
-                var opt = $.extend(cfg, event.data);
-                
-                if (move.point.length !== 2) {
-                    state.move.pop();
-                    return;
-                }
-
-                if (state.start.point.length !== 2 && move.point.length === 2) { // in case the user failed to start with 2 fingers
-                    state.start = $.extend({}, move);
-                }
-
-                state.rotation = touch.calc.getRotation(state.start, move);
-                state.scale = touch.calc.getScale(state.start, move);
-
-                if (Math.abs(1-state.scale) > opt.scale || Math.abs(state.rotation) > opt.rotation) {
-                    if(!started) {
-                        $(this).trigger($.Event('transformstart', state));
-                        started = true;
-                    }
-
-                    $(this).trigger($.Event('transform', state));
-                }
-            },
-            touchend: function (event, state, end) {
-                if(started) {
-                    started = false;
-
-                    if (end.point.length !== 2) { // in case the user failed to start with 2 fingers
-                        state.end = $.extend({}, state.move[state.move.length - 1]);
-                    }
-
-                    state.rotation = touch.calc.getRotation(state.start, state.end);
-                    state.scale = touch.calc.getScale(state.start, state.end);
-
-                    $(this).trigger($.Event('transformend', state));
-                }
+            if (move.point.length !== 2) {
+                return;
             }
-        });
-    }());
+
+            state[namespace].move.push(move);
+
+            if (state[namespace].start.point.length !== 2 && move.point.length === 2) { // in case the user failed to start with 2 fingers
+                state[namespace].start = $.extend({}, move);
+            }
+
+            state[namespace].rotation = touch.calc.getRotation(state[namespace].start, move);
+            state[namespace].scale = touch.calc.getScale(state[namespace].start, move);
+
+            if (Math.abs(1-state[namespace].scale) > opt.scale || Math.abs(state[namespace].rotation) > opt.rotation) {
+                if(!started) {
+                    $(event.target).trigger($.Event('transformstart', state[namespace]));
+                    started = true;
+                }
+
+                $(event.target).trigger($.Event('transform', state[namespace]));
+            }
+        },
+        touchend: function (event, state, end) {
+            if(started) {
+                started = false;
+
+                if (end.point.length !== 2) { // in case the user failed to end with 2 fingers
+                    state.end = $.extend({}, state[namespace].move[state[namespace].move.length - 1]);
+                }
+
+                state[namespace].rotation = touch.calc.getRotation(state[namespace].start, state.end);
+                state[namespace].scale = touch.calc.getScale(state[namespace].start, state.end);
+
+                $(event.target).trigger($.Event('transformend', state[namespace]));
+            }
+        }
+    });
 
 }(jQuery, jQuery.toe, this));

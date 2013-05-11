@@ -1,23 +1,52 @@
 /*!
- * toe.js
- * version 2.0.1
- * author: Damien Antipa
- * https://github.com/dantipa/toe.js
- */
+* toe.js
+* version 3.0.0
+* author: Damien Antipa
+* https://github.com/dantipa/toe.js
+*/
+(function ($, window, undefined) {
 
- (function ($, window, undefined) {
+    var state, gestures = {}, touch = {
 
-    var touch = {
+        on: function() {
+            $(document).on('touchstart', touchstart)
+                .on('touchmove', touchmove)
+                .on('touchend touchcancel', touchend);
+        },
 
-        Event: function (event) {
+        off: function() {
+            $(document).off('touchstart', touchstart)
+                .off('touchmove', touchmove)
+                .off('touchend touchcancel', touchend);
+        },
+
+        track: function (namespace, gesture) {
+            gestures[namespace] = gesture;
+        },
+
+        addEventParam: function (event, extra) {
+            var $t = $(event.target),
+                pos = $t.offset(),
+                param = {
+                    pageX: event.point[0].x,
+                    pageY: event.point[0].y,
+                    offsetX: pos.left - event.point[0].x,
+                    offsetY: pos.top - event.point[0].y
+                };
+
+            return $.extend(param, extra);
+        },
+
+        Event: function (event) { // normalizes and simplifies the event object
             var normalizedEvent = {
+                type: event.type,
                 timestamp: new Date().getTime(),
-                target: event.target,
+                target: event.target,   // target is always consistent through start, move, end
                 point: []
-            }, points = event.changedTouches || 
-                        event.originalEvent.changedTouches || 
-                        event.touches || 
-                        event.originalEvent.touches;
+            }, points = event.changedTouches ||
+                event.originalEvent.changedTouches ||
+                event.touches ||
+                event.originalEvent.touches;
 
             $.each(points, function (i, e) {
                 normalizedEvent.point.push({
@@ -32,49 +61,11 @@
         State: function (start) {
             var p = start.point[0];
 
-            return {
+            return {   // TODO add screenX etc.
                 start: start,
                 move: [],
-                end: null,
-                pageX: p.x,
-                pageY: p.y
+                end: null
             };
-        },
-
-        track: function (gesture) {
-            var state,
-                touchstart = function (event) {
-                    var start = touch.Event(event);
-                    state = touch.State(start); // create a new State object and add start event
-
-                    gesture.touchstart.call(this, event, state, start);
-                },
-                touchmove = function (event) {
-                    var move = touch.Event(event);
-                    state.move.push(move);
-
-                    gesture.touchmove.call(this, event, state, move);
-                },
-                touchend = function (event) {
-                    var end = touch.Event(event);
-                    state.end = end;
-
-                    gesture.touchend.call(this, event, state, end);
-                };
-
-            gesture.setup = function (data, namespaces, eventHandle) {
-                $(this).on('touchstart', data, touchstart)
-                    .on('touchmove', data, touchmove)
-                    .on('touchend touchcancel', data, touchend);
-            };
-
-            gesture.teardown = function () {
-                $(this).off('touchstart', touchstart)
-                    .off('touchmove', touchmove)
-                    .off('touchend touchcancel', touchend);
-            };
-
-            return gesture;
         },
 
         calc: {
@@ -93,9 +84,9 @@
             getDirection: function (angle) {
                 return angle < -45 && angle > -135 ? 'top':
                     angle >= -45 && angle <= 45 ? 'right':
-                    angle >= 45 && angle < 135 ? 'down':
-                    angle >= 135 || angle <= -135 ? 'left':
-                    'unknown';
+                        angle >= 45 && angle < 135 ? 'down':
+                            angle >= 135 || angle <= -135 ? 'left':
+                                'unknown';
             },
 
             getScale: function (start, move) {
@@ -120,9 +111,39 @@
                 return 0;
             }
         }
-    };
+
+    }; // touch obj
+
+    function loopHandler(type, event, state, point) {
+        $.each(gestures, function (i, g) {
+            g[type].call(this, event, state, point);
+        });
+    }
+
+    function touchstart(event) {
+        var start = touch.Event(event);
+        state = touch.State(start); // create a new State object and add start event
+
+        loopHandler('touchstart', event, state, start);
+    }
+
+    function touchmove(event) {
+        var move = touch.Event(event);
+        state.move.push(move);
+
+        loopHandler('touchmove', event, state, move);
+    }
+
+    function touchend(event) {
+        var end = touch.Event(event);
+        state.end = end;
+
+        loopHandler('touchend', event, state, end);
+    }
+
+    touch.on();
 
     // add to namespace
     $.toe = touch;
 
- }(jQuery, this));
+}(jQuery, this));
