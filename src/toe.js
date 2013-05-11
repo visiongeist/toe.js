@@ -1,6 +1,6 @@
 /*!
 * toe.js
-* version 3.0.0
+* version 3.0.1
 * author: Damien Antipa
 * https://github.com/dantipa/toe.js
 */
@@ -8,13 +8,13 @@
 
     var state, gestures = {}, touch = {
 
-        on: function() {
+        on: function () {
             $(document).on('touchstart', touchstart)
                 .on('touchmove', touchmove)
                 .on('touchend touchcancel', touchend);
         },
 
-        off: function() {
+        off: function () {
             $(document).off('touchstart', touchstart)
                 .off('touchmove', touchmove)
                 .off('touchend touchcancel', touchend);

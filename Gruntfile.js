@@ -32,9 +32,23 @@ module.exports = function(grunt) {
             options: {
                 preserveComments: 'some'
             },
-            dist: {
+            jquery: {
                 src: ['dist/toe.js'],
                 dest: 'dist/toe.min.js'
+            },
+            zepto: {
+                src: ['dist/toe.zepto.js'],
+                dest: 'dist/toe.zepto.min.js'
+            }
+        },
+        replace: {
+            zepto: {
+                src: ['dist/toe.js'],
+                dest: 'dist/toe.zepto.js',
+                replacements: [{
+                    from: 'jQuery',
+                    to: 'Zepto'
+                }]
             }
         }
     });
@@ -42,7 +56,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-text-replace');
 
-    grunt.registerTask('default', ['concat', 'jshint', 'uglify']);
-
+    grunt.registerTask('default', ['concat', 'jshint', 'replace', 'uglify']);
 };

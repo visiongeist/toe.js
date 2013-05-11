@@ -146,7 +146,7 @@
     // add to namespace
     $.toe = touch;
 
-}(jQuery, this));
+}(Zepto, this));
 (function ($, touch, window, undefined) {
 
     var namespace = 'swipe', cfg = {
@@ -188,7 +188,7 @@
         }
     });
 
-}(jQuery, jQuery.toe, this));
+}(Zepto, Zepto.toe, this));
 (function ($, touch, window, undefined) {
 
     var namespace = 'tap', cfg = {
@@ -228,7 +228,7 @@
         }
     });
 
-}(jQuery, jQuery.toe, this));
+}(Zepto, Zepto.toe, this));
 (function ($, touch, window, undefined) {
 
     var timer, abort,
@@ -275,7 +275,7 @@
         }
     });
 
-}(jQuery, jQuery.toe, this));
+}(Zepto, Zepto.toe, this));
 (function ($, touch, window, undefined) {
 
     var namespace = 'transform', cfg = {
@@ -333,4 +333,4 @@
         }
     });
 
-}(jQuery, jQuery.toe, this));
+}(Zepto, Zepto.toe, this));
