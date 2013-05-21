@@ -5,19 +5,19 @@
 * https://github.com/dantipa/toe.js
 */
 (function ($, window, undefined) {
+	var isTouch = ("ontouchstart" in window), START_EVENT = isTouch ? "touchstart" : "mousedown",
+		MOVE_EVENT = isTouch ? "touchmove" : "mousemove", END_EVENT = isTouch ? "touchend touchcancel" : "mouseup";
 
-    var state, gestures = {}, touch = {
+    var state, touchStarted = false, gestures = {}, touch = {
 
         on: function () {
-            $(document).on('touchstart', touchstart)
-                .on('touchmove', touchmove)
-                .on('touchend touchcancel', touchend);
+            $(document).on(START_EVENT, touchstart);
         },
 
         off: function () {
-            $(document).off('touchstart', touchstart)
-                .off('touchmove', touchmove)
-                .off('touchend touchcancel', touchend);
+            $(document).off(START_EVENT, touchstart)
+                .off(MOVE_EVENT, touchmove)
+                .off(END_EVENT, touchend);
         },
 
         track: function (namespace, gesture) {
@@ -43,10 +43,8 @@
                 timestamp: new Date().getTime(),
                 target: event.target,   // target is always consistent through start, move, end
                 point: []
-            }, points = event.changedTouches ||
-                event.originalEvent.changedTouches ||
-                event.touches ||
-                event.originalEvent.touches;
+            }, points = isTouch ? (event.changedTouches || event.originalEvent.changedTouches || event.touches || event.originalEvent.touches)
+				: ( event ? [ event ] : (event.originalEvent ? [ event.originalEvent ] : []));
 
             $.each(points, function (i, e) {
                 normalizedEvent.point.push({
@@ -54,7 +52,7 @@
                     y: e.pageY
                 });
             });
-
+			
             return normalizedEvent;
         },
 
@@ -124,10 +122,13 @@
         var start = touch.Event(event);
         state = touch.State(start); // create a new State object and add start event
 
+		touchStarted = true;
+		$(document).on(MOVE_EVENT, touchmove).on(END_EVENT, touchend);
         loopHandler('touchstart', event, state, start);
     }
 
     function touchmove(event) {
+		if (!touchStarted) { return; }
         var move = touch.Event(event);
         state.move.push(move);
 
@@ -135,6 +136,9 @@
     }
 
     function touchend(event) {
+		if (!touchStarted) { return; }
+		touchStarted = false;
+		$(document).off(MOVE_EVENT, touchmove).off(END_EVENT, touchend);
         var end = touch.Event(event);
         state.end = end;
 
