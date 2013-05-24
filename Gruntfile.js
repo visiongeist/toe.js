@@ -50,6 +50,14 @@ module.exports = function(grunt) {
                     to: 'Zepto'
                 }]
             }
+        },
+        jsdoc : {
+            dist : {
+                src: ['src/toe.js', 'src/gestures/*.js'], 
+                options: {
+                    destination: 'dist/doc'
+                }
+            }
         }
     });
 
@@ -57,6 +65,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-text-replace');
+    grunt.loadNpmTasks('grunt-jsdoc');
 
-    grunt.registerTask('default', ['concat', 'jshint', 'replace', 'uglify']);
+    grunt.registerTask('default', ['concat', 'jshint', 'replace', 'uglify', 'jsdoc']);
 };

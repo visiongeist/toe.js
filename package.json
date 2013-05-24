@@ -1,6 +1,6 @@
 {
     "name": "Toe.js",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "description": "Advanced touch events for jQuery",
     "homepage": "http://adobe.com",
     "author": "Damien Antipa",
@@ -17,7 +17,8 @@
         "grunt-contrib-concat": "0.1.2",
         "grunt-contrib-uglify": "0.1.1",
         "grunt-contrib-jshint": "0.1.0",
-        "grunt-text-replace": "0.3.2"
+        "grunt-text-replace": "0.3.2",
+        "grunt-jsdoc": "0.3.2"
     },
     "licenses": [
         {
