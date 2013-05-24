@@ -18,7 +18,7 @@
 
             clearTimeout(timer);
             timer = setTimeout(function () {
-                if (!abort) {
+                if (!abort && touch.active) {
                     if (state[namespace].finger === opt.finger) {
                         $(event.target).trigger($.Event(namespace, touch.addEventParam(start, state[namespace])));
                     }
