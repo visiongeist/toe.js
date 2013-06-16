@@ -1,6 +1,6 @@
 /*!
 * toe.js
-* version 3.0.2
+* version 3.0.3
 * author: Damien Antipa
 * https://github.com/dantipa/toe.js
 */
@@ -8,8 +8,8 @@
 
     var state,
         gestures = {},
-        isTouch = 'ontouchstart' in window, 
-        touch = {
+        isTouch = 'ontouchstart' in window,
+        touch = { /** @lends $.toe */
 
             /**
              * flag to indicate if the touch handling is
@@ -151,10 +151,10 @@
                 /**
                  * returns the direction of a movement based on an angle
                  * @param  {Number} angle
-                 * @return {String} 'top', 'down', 'left', 'right' or 'unknown'
+                 * @return {String} 'up', 'down', 'left', 'right' or 'unknown'
                  */
                 getDirection: function (angle) {
-                    return angle < -45 && angle > -135 ? 'top':
+                    return angle < -45 && angle > -135 ? 'up':
                         angle >= -45 && angle <= 45 ? 'right':
                             angle >= 45 && angle < 135 ? 'down':
                                 angle >= 135 || angle <= -135 ? 'left':

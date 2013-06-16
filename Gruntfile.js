@@ -53,7 +53,7 @@ module.exports = function(grunt) {
         },
         jsdoc : {
             dist : {
-                src: ['src/toe.js', 'src/gestures/*.js'], 
+                src: ['src/toe.js', 'src/gestures/*.js'],
                 options: {
                     destination: 'dist/doc'
                 }
@@ -67,5 +67,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-text-replace');
     grunt.loadNpmTasks('grunt-jsdoc');
 
-    grunt.registerTask('default', ['concat', 'jshint', 'replace', 'uglify', 'jsdoc']);
+    grunt.registerTask('default', ['concat', 'jshint', 'replace', 'uglify']);
 };
