@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Demo: toe.js</title>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="../dist/toe.js"></script>
     <style>
         #swipeme {
@@ -12,6 +12,8 @@
             text-align: center;
             font-size: 3em;
             width: 100%;
+            /* Direct all pointer events to JavaScript code. */
+            -ms-touch-action: none;
         }
     </style>
 </head>
