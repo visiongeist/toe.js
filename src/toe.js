@@ -8,7 +8,6 @@
 
     var state,
         gestures = {},
-        isPointer = 'MSPointerEvent' in window,
         isTouch = 'ontouchstart' in window,
         touch = { /** @lends $.toe */
 
@@ -23,9 +22,9 @@
              * will implicitly be called when including
              */
             on: function () {
-                $(document).on('touchstart MSPointerDown mousedown', touchstart)
-                    .on('touchmove MSPointerMove MSPointerHover mousemove', touchmove)
-                    .on('touchend touchcancel MSPointerUp MSPointerCancel mouseup', touchend);
+                $(document).on('touchstart MSPointerDown pointerdown', touchstart)
+                    .on('touchmove MSPointerMove MSPointerHover pointermove', touchmove)
+                    .on('touchend touchcancel MSPointerUp MSPointerCancel pointerup pointercancel', touchend);
 
                 touch.active = true;
             },
@@ -34,9 +33,9 @@
              * turns off the tracking of touch events
              */
             off: function () {
-                $(document).off('touchstart MSPointerDown mousedown', touchstart)
-                    .off('touchmove MSPointerMove MSPointerHover mousemove', touchmove)
-                    .off('touchend touchcancel MSPointerUp MSPointerCancel mouseup', touchend);
+                $(document).off('touchstart MSPointerDown pointerdown', touchstart)
+                    .off('touchmove MSPointerMove MSPointerHover pointermove ', touchmove)
+                    .off('touchend touchcancel MSPointerUp MSPointerCancel pointerup pointercancel', touchend);
 
                 touch.active = false;
             },
@@ -92,16 +91,12 @@
                     points = event.changedTouches || event.originalEvent.changedTouches || event.touches || event.originalEvent.touches;
                 } else 
                 // MSPointer
-                if (event.type.indexOf('Pointer') > -1) {
-                    points = event.intermediatePoints || event.originalEvent.intermediatePoints;
-                } else 
-                // Mouse
-                {
-                    points = [event];
+                if (event.type.match(/.*?pointer.*?/i)) {
+                    points = [event.originalEvent];
                 }
 
                 $.each(points, function (i, e) {
-                    normalizedEvent.point.push({x: e.pageX,y: e.pageY});
+                    normalizedEvent.point.push({x: e.pageX, y: e.pageY});
                 });
 
                 return normalizedEvent;
@@ -237,7 +232,6 @@
      * @param  {Object} event
      */
     function touchmove(event) {
-        //skip on plain mousemove w/o mousedown
         if (!state) { return; }
 
         var move = touch.Event(event);
