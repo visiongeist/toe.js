@@ -22,9 +22,9 @@
              * will implicitly be called when including
              */
             on: function () {
-                $(document).on('touchstart', touchstart)
-                    .on('touchmove', touchmove)
-                    .on('touchend touchcancel', touchend);
+                $(document).on('touchstart MSPointerDown pointerdown', touchstart)
+                    .on('touchmove MSPointerMove MSPointerHover pointermove', touchmove)
+                    .on('touchend touchcancel MSPointerUp MSPointerCancel pointerup pointercancel', touchend);
 
                 touch.active = true;
             },
@@ -33,9 +33,9 @@
              * turns off the tracking of touch events
              */
             off: function () {
-                $(document).off('touchstart', touchstart)
-                    .off('touchmove', touchmove)
-                    .off('touchend touchcancel', touchend);
+                $(document).off('touchstart MSPointerDown pointerdown', touchstart)
+                    .off('touchmove MSPointerMove MSPointerHover pointermove ', touchmove)
+                    .off('touchend touchcancel MSPointerUp MSPointerCancel pointerup pointercancel', touchend);
 
                 touch.active = false;
             },
@@ -83,16 +83,20 @@
                     timestamp: new Date().getTime(),
                     target: event.target,   // target is always consistent through start, move, end
                     point: []
-                }, points = event.changedTouches ||
-                    event.originalEvent.changedTouches ||
-                    event.touches ||
-                    event.originalEvent.touches;
+                };
+
+                var points = [];
+                // Touch
+                if (event.type.indexOf('touch') > -1) {
+                    points = event.changedTouches || event.originalEvent.changedTouches || event.touches || event.originalEvent.touches;
+                } else 
+                // MSPointer
+                if (event.type.match(/.*?pointer.*?/i)) {
+                    points = [event.originalEvent];
+                }
 
                 $.each(points, function (i, e) {
-                    normalizedEvent.point.push({
-                        x: e.pageX,
-                        y: e.pageY
-                    });
+                    normalizedEvent.point.push({x: e.pageX, y: e.pageY});
                 });
 
                 return normalizedEvent;
@@ -228,6 +232,8 @@
      * @param  {Object} event
      */
     function touchmove(event) {
+        if (!state) { return; }
+
         var move = touch.Event(event);
         state.move.push(move);
 
