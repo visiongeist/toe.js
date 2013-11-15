@@ -34,6 +34,29 @@
                     );
                 }
             }
+            // this is adapted from jquery.event.tap (https://github.com/stephband/jquery.event.tap)
+            // Android only cancels mouse events if preventDefault has been
+            // called on touchstart. We can't do that. That stops scroll and other
+            // gestures. Pants. Also, the default Android browser sends simulated
+            // mouse events whatever you do. These browsers have something in common:
+            // their touch identifiers are always 0.
+            if (!state.amputateFlag && (event.originalEvent.changedTouches[0].identifier === 0)) {
+                state.amputateFlag = true;
+                var killEvent = function(e) {
+                    if (!$(e.target).filter('input, select, textarea, [contenteditable="true"]').is(':focus')) {
+                        //this is not working properly for contenteditables
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                    }
+                };
+                // It's extreme, but stopping simulated events in the capture phase is one
+                // way of getting dumb browsers to appear not to emit them.
+                document.addEventListener('mousedown', killEvent, true);
+                document.addEventListener('mousemove', killEvent, true);
+                document.addEventListener('mouseup', killEvent, true);
+                document.addEventListener('click', killEvent, true);
+            }
         }
     });
 
