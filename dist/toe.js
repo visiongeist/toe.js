@@ -367,7 +367,7 @@
     var timer, abort,
         namespace = 'taphold', cfg = {
             distance: 20,
-            duration: 500,
+            duration: 750,
             finger: 1
         };
 
