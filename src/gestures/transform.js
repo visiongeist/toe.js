@@ -30,8 +30,8 @@
             state[namespace].rotation = touch.calc.getRotation(state[namespace].start, move);
             state[namespace].scale = touch.calc.getScale(state[namespace].start, move);
 
-            if (Math.abs(1-state[namespace].scale) > opt.scale || Math.abs(state[namespace].rotation) > opt.rotation) {
-                if(!started) {
+            if (Math.abs(1 - state[namespace].scale) > opt.scale || Math.abs(state[namespace].rotation) > opt.rotation) {
+                if (!started) {
                     $(event.target).trigger($.Event('transformstart', state[namespace]));
                     started = true;
                 }
@@ -40,7 +40,7 @@
             }
         },
         touchend: function (event, state, end) {
-            if(started) {
+            if (started) {
                 started = false;
 
                 if (end.point.length !== 2) { // in case the user failed to end with 2 fingers

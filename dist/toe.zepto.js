@@ -1,9 +1,9 @@
 /*!
-* toe.js
-* version 3.0.3
-* author: Damien Antipa
-* https://github.com/dantipa/toe.js
-*/
+ * toe.js
+ * version 3.0.4
+ * author: Damien Antipa
+ * https://github.com/dantipa/toe.js
+ */
 (function ($, window, undefined) {
 
     var state,
@@ -42,7 +42,7 @@
 
             /**
              * track new gesture
-             * 
+             *
              * @param  {String} namespace for the gesture
              * @param  {Object} gesture handlers for the touch events
              * @param  {Function} gesture.touchstart
@@ -57,7 +57,7 @@
              * returns normalized event parameters
              * @param  {Event} event
              * @param  {Object} extra additional parameters to add
-             * @return {Object} 
+             * @return {Object}
              */
             addEventParam: function (event, extra) {
                 var $t = $(event.target),
@@ -89,7 +89,7 @@
                 // Touch
                 if (event.type.indexOf('touch') > -1) {
                     points = event.changedTouches || event.originalEvent.changedTouches || event.touches || event.originalEvent.touches;
-                } else 
+                } else
                 // MSPointer
                 if (event.type.match(/.*?pointer.*?/i)) {
                     points = [event.originalEvent];
@@ -158,10 +158,10 @@
                  * @return {String} 'up', 'down', 'left', 'right' or 'unknown'
                  */
                 getDirection: function (angle) {
-                    return angle < -45 && angle > -135 ? 'up':
-                        angle >= -45 && angle <= 45 ? 'right':
-                            angle >= 45 && angle < 135 ? 'down':
-                                angle >= 135 || angle <= -135 ? 'left':
+                    return angle < -45 && angle > -135 ? 'up' :
+                        angle >= -45 && angle <= 45 ? 'right' :
+                            angle >= 45 && angle < 135 ? 'down' :
+                                angle >= 135 || angle <= -135 ? 'left' :
                                     'unknown';
                 },
 
@@ -169,13 +169,13 @@
                  * returns the scale of a transformation
                  * @param  {Object} start
                  * @param  {Object} move
-                 * @return {Number} 
+                 * @return {Number}
                  */
                 getScale: function (start, move) {
                     var sp = start.point,
                         mp = move.point;
 
-                    if(sp.length === 2 && mp.length === 2) { // needs to have the position of two fingers
+                    if (sp.length === 2 && mp.length === 2) { // needs to have the position of two fingers
                         return (Math.sqrt(Math.pow(mp[0].x - mp[1].x, 2) + Math.pow(mp[0].y - mp[1].y, 2)) / Math.sqrt(Math.pow(sp[0].x - sp[1].x, 2) + Math.pow(sp[0].y - sp[1].y, 2))).toFixed(2);
                     }
 
@@ -192,7 +192,7 @@
                     var sp = start.point,
                         mp = move.point;
 
-                    if(sp.length === 2 && mp.length === 2) {
+                    if (sp.length === 2 && mp.length === 2) {
                         return ((Math.atan2(mp[0].y - mp[1].y, mp[0].x - mp[1].x) * 180 / Math.PI) - (Math.atan2(sp[0].y - sp[1].y, sp[0].x - sp[1].x) * 180 / Math.PI)).toFixed(2);
                     }
 
@@ -206,7 +206,7 @@
      * loops over all gestures
      * @private
      * @param  {String} type the handler's name
-     * @param  {Event} event 
+     * @param  {Event} event
      * @param  {Object} state
      * @param  {Obejcect} point
      */
@@ -260,10 +260,10 @@
 (function ($, touch, window, undefined) {
 
     var namespace = 'swipe', cfg = {
-            distance: 40, // minimum
-            duration: 1200, // maximum
-            direction: 'all'
-        };
+        distance: 40, // minimum
+        duration: 1200, // maximum
+        direction: 'all'
+    };
 
     touch.track(namespace, {
         touchstart: function (event, state, start) {
@@ -301,8 +301,11 @@
 }(Zepto, Zepto.toe, this));
 (function ($, touch, window, undefined) {
 
+    var clientWidth = document.documentElement.clientWidth, clientHeight = document.documentElement.clientHeight;
+    var averageScreenLength = Math.sqrt(clientWidth * clientHeight);
+    var relativeDistance = (5 / 100) * averageScreenLength;
     var namespace = 'tap', cfg = {
-        distance: 10,
+        distance: relativeDistance,
         duration: 300,
         finger: 1
     };
@@ -418,8 +421,8 @@
             state[namespace].rotation = touch.calc.getRotation(state[namespace].start, move);
             state[namespace].scale = touch.calc.getScale(state[namespace].start, move);
 
-            if (Math.abs(1-state[namespace].scale) > opt.scale || Math.abs(state[namespace].rotation) > opt.rotation) {
-                if(!started) {
+            if (Math.abs(1 - state[namespace].scale) > opt.scale || Math.abs(state[namespace].rotation) > opt.rotation) {
+                if (!started) {
                     $(event.target).trigger($.Event('transformstart', state[namespace]));
                     started = true;
                 }
@@ -428,7 +431,7 @@
             }
         },
         touchend: function (event, state, end) {
-            if(started) {
+            if (started) {
                 started = false;
 
                 if (end.point.length !== 2) { // in case the user failed to end with 2 fingers
