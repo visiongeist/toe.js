@@ -1,10 +1,10 @@
 (function ($, touch, window, undefined) {
 
     var namespace = 'swipe', cfg = {
-            distance: 40, // minimum
-            duration: 1200, // maximum
-            direction: 'all'
-        };
+        distance: 40, // minimum
+        duration: 1200, // maximum
+        direction: 'all'
+    };
 
     touch.track(namespace, {
         touchstart: function (event, state, start) {
