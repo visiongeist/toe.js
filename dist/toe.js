@@ -349,7 +349,7 @@
             if (!state.amputateFlag && (event.originalEvent.changedTouches[0].identifier === 0)) {
                 state.amputateFlag = true;
                 var killEvent = function(event) {
-                    if ($(event.target).data('touched')) {
+                    if ($(event.target).data('touched') || $(event.target).is('select') || $(event.target).is('input')) {
                         if (event.type === 'click') {
                             $(event.target).data('touched', false);
                         }
