@@ -1,8 +1,9 @@
 (function ($, touch, window, undefined) {
 
-    var clientWidth = document.documentElement.clientWidth, clientHeight = document.documentElement.clientHeight;
+    var clientWidth = document.documentElement.clientWidth;
+    var clientHeight = document.documentElement.clientHeight;
     var averageScreenLength = Math.sqrt(clientWidth * clientHeight);
-    var relativeDistance = (5 / 100) * averageScreenLength;
+    var relativeDistance = (2 / 100) * averageScreenLength;
     var namespace = 'tap', cfg = {
         distance: relativeDistance,
         duration: 300,
