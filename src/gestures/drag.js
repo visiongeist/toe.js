@@ -1,16 +1,19 @@
 (function ($, touch, window, undefined) {
 
     var namespace = 'drag', cfg = {
-        distance: 20, // minimum
-        duration: 1200, // maximum
+        distance: 10, // minimum
         direction: 'all'
     };
+
+    var previousPoint = {x: 0, y: 0};
 
     touch.track(namespace, {
         touchstart: function (event, state, start) {
             state[namespace] = {
                 finger: start.point.length
             };
+            previousPoint.x = start.point[0].x;
+            previousPoint.y = start.point[0].y;
         },
         touchmove: function (event, state, move) {
             var opt = $.extend(cfg, event.data);
@@ -20,34 +23,17 @@
             state[namespace].distance = touch.calc.getDistance(state.start.point[0], move.point[0]);
             state[namespace].angle = touch.calc.getAngle(state.start.point[0], move.point[0]);
             state[namespace].direction = touch.calc.getDirection(state[namespace].angle);
+            state[namespace].deltaX = move.point[0].x - previousPoint.x;
+            state[namespace].deltaY = move.point[0].y - previousPoint.y;
 
             if (state[namespace].distance > opt.distance) {
-                $(event.target).trigger($.Event(namespace, touch.addEventParam(state.start, state[namespace])));
+                $(event.target).trigger($.Event(namespace, touch.addEventParam(move, state[namespace])));
             }
 
         },
         touchend: function (event, state, end) {
-            /*
-            var opt = $.extend(cfg, event.data),
-                duration,
-                distance;
-
-            // calc
-            duration = touch.calc.getDuration(state.start, end);
-            distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
-
-            // check if the swipe was valid
-            if (duration < opt.duration && distance > opt.distance) {
-
-                state[namespace].angle = touch.calc.getAngle(state.start.point[0], end.point[0]);
-                state[namespace].direction = touch.calc.getDirection(state[namespace].angle);
-
-                // fire if the amount of fingers match
-                if (opt.direction === 'all' || state[namespace].direction === opt.direction) {
-                    $(event.target).trigger($.Event(namespace, touch.addEventParam(state.start, state[namespace])));
-                }
-            }
-            */
+            previousPoint.x = 0;
+            previousPoint.y = 0;
         }
     });
 

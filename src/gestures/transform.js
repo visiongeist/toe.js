@@ -35,7 +35,7 @@
                     $(event.target).trigger($.Event('transformstart', state[namespace]));
                     started = true;
                 }
-
+                
                 $(event.target).trigger($.Event('transform', state[namespace]));
             }
         },
