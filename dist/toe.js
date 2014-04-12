@@ -354,6 +354,9 @@
             state[namespace].deltaX = move.point[0].x - previousPoint.x;
             state[namespace].deltaY = move.point[0].y - previousPoint.y;
 
+            previousPoint.x = move.point[0].x;
+            previousPoint.y = move.point[0].y;
+
             if (state[namespace].distance > opt.distance) {
                 $(event.target).trigger($.Event(namespace, touch.addEventParam(move, state[namespace])));
             }
