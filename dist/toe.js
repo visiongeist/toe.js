@@ -267,8 +267,8 @@
     var previousTouch = {timestamp: 0, point: null};
 
     var namespace = 'doubletap', cfg = {
-        distance: 40,
-        duration: 300,
+        distance: 80,
+        duration: 500,
         interval: 600,
         finger: 1
     };
@@ -326,6 +326,7 @@
     });
 
 }(jQuery, jQuery.toe, this));
+
 (function ($, touch, window, undefined) {
 
     var namespace = 'drag', cfg = {
@@ -371,13 +372,15 @@
         touchend: function (event, state, end) {
             previousPoint.x = 0;
             previousPoint.y = 0;         
-
-            $(event.target).trigger($.Event(namespace+"stop", touch.addEventParam(end)));
-            isDragging = false;
+            if (isDragging) {
+                $(event.target).trigger($.Event(namespace+"stop", touch.addEventParam(end)));
+                isDragging = false;
+            }
         }
     });
 
 }(jQuery, jQuery.toe, this));
+
 (function ($, touch, window, undefined) {
 
     var namespace = 'swipe', cfg = {
@@ -469,7 +472,7 @@
     var timer, abort,
         namespace = 'taphold', cfg = {
             distance: 20,
-            duration: 500,
+            duration: 1000,
             finger: 1
         };
 
@@ -511,6 +514,7 @@
     });
 
 }(jQuery, jQuery.toe, this));
+
 (function ($, touch, window, undefined) {
 
     var namespace = 'transform', cfg = {

@@ -43,9 +43,10 @@
         touchend: function (event, state, end) {
             previousPoint.x = 0;
             previousPoint.y = 0;         
-
-            $(event.target).trigger($.Event(namespace+"stop", touch.addEventParam(end)));
-            isDragging = false;
+            if (isDragging) {
+                $(event.target).trigger($.Event(namespace+"stop", touch.addEventParam(end)));
+                isDragging = false;
+            }
         }
     });
 

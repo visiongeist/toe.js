@@ -8,8 +8,8 @@
     var previousTouch = {timestamp: 0, point: null};
 
     var namespace = 'doubletap', cfg = {
-        distance: 40,
-        duration: 300,
+        distance: 80,
+        duration: 500,
         interval: 600,
         finger: 1
     };
