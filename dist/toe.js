@@ -259,6 +259,130 @@
 }(jQuery, this));
 (function ($, touch, window, undefined) {
 
+    var clientWidth = document.documentElement.clientWidth;
+    var clientHeight = document.documentElement.clientHeight;
+    var averageScreenLength = Math.sqrt(clientWidth * clientHeight);
+    var relativeDistance = (2 / 100) * averageScreenLength;
+
+    var previousTouch = {timestamp: 0, point: null};
+
+    var namespace = 'doubletap', cfg = {
+        distance: 80,
+        duration: 500,
+        interval: 600,
+        finger: 1
+    };
+
+    touch.track(namespace, {
+        touchstart: function (event, state, start) {
+            state[namespace] = {
+                finger: start.point.length
+            };
+        },
+        touchmove: function (event, state, move) {
+            // if another finger was used then increment the amount of fingers used
+            state[namespace].finger = move.point.length > state[namespace].finger ? move.point.length : state[namespace].finger;
+        },
+        touchend: function (event, state, end) {
+            var opt = $.extend(cfg, event.data),
+                duration,
+                distance;
+
+            // calc
+            duration = touch.calc.getDuration(state.start, end);
+            distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
+
+            // check if the tap was valid
+            if (duration < opt.duration && distance < opt.distance) {
+                // fire if the amount of fingers match
+
+                if (state[namespace].finger === opt.finger) {
+
+                    var currentTime = new Date();
+                    var timeDelta = null;
+                    var touchPointDelta = null;
+
+                    if (previousTouch.timestamp < currentTime.getTime()) {
+                        timeDelta = currentTime.getTime() - previousTouch.timestamp;
+                    }
+
+                    if (previousTouch.point != null) {
+                        touchPointDelta = touch.calc.getDistance(previousTouch.point, end.point[0]);
+                    }
+
+                    if (timeDelta != null && touchPointDelta != null) {
+                        if (timeDelta > 0 && timeDelta < opt.interval && distance < opt.distance) {
+                            $(event.target).trigger(
+                                $.Event(namespace, touch.addEventParam(state.start, state[namespace]))
+                            );
+                        }
+                    }
+
+                    previousTouch.timestamp = currentTime.getTime();
+                    previousTouch.point = end.point[0];
+                }
+            }
+        }
+    });
+
+}(jQuery, jQuery.toe, this));
+
+(function ($, touch, window, undefined) {
+
+    var namespace = 'drag', cfg = {
+        distance: 20, // minimum
+        direction: 'all'
+    };
+
+    var previousPoint = {x: 0, y: 0};
+    var isDragging = false;
+
+    touch.track(namespace, {
+        touchstart: function (event, state, start) {
+            state[namespace] = {
+                finger: start.point.length
+            };
+            previousPoint.x = start.point[0].x;
+            previousPoint.y = start.point[0].y;
+            isDragging = false;
+        },
+        touchmove: function (event, state, move) {
+            var opt = $.extend(cfg, event.data);
+
+            // if another finger was used then increment the amount of fingers used
+            state[namespace].finger = move.point.length > state[namespace].finger ? move.point.length : state[namespace].finger;
+            state[namespace].distance = touch.calc.getDistance(state.start.point[0], move.point[0]);
+            state[namespace].angle = touch.calc.getAngle(state.start.point[0], move.point[0]);
+            state[namespace].direction = touch.calc.getDirection(state[namespace].angle);
+            state[namespace].deltaX = move.point[0].x - previousPoint.x;
+            state[namespace].deltaY = move.point[0].y - previousPoint.y;
+
+            previousPoint.x = move.point[0].x;
+            previousPoint.y = move.point[0].y;
+
+            if (state[namespace].distance > opt.distance) {
+                if (!isDragging) {
+                    $(event.target).trigger($.Event(namespace+"start", touch.addEventParam(state.start)));
+                    isDragging = true;
+                }
+                $(event.target).trigger($.Event(namespace, touch.addEventParam(move, state[namespace])));
+            }
+
+        },
+        touchend: function (event, state, end) {
+            previousPoint.x = 0;
+            previousPoint.y = 0;         
+            if (isDragging) {
+                $(event.target).trigger($.Event(namespace+"stop", touch.addEventParam(end)));
+                isDragging = false;
+            }
+        }
+    });
+
+}(jQuery, jQuery.toe, this));
+
+(function ($, touch, window, undefined) {
+
     var namespace = 'swipe', cfg = {
         distance: 40, // minimum
         duration: 1200, // maximum
@@ -348,7 +472,7 @@
     var timer, abort,
         namespace = 'taphold', cfg = {
             distance: 20,
-            duration: 500,
+            duration: 1000,
             finger: 1
         };
 
@@ -390,6 +514,7 @@
     });
 
 }(jQuery, jQuery.toe, this));
+
 (function ($, touch, window, undefined) {
 
     var namespace = 'transform', cfg = {
@@ -427,7 +552,7 @@
                     $(event.target).trigger($.Event('transformstart', state[namespace]));
                     started = true;
                 }
-
+                
                 $(event.target).trigger($.Event('transform', state[namespace]));
             }
         },
