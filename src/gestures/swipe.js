@@ -30,6 +30,7 @@
 
                 state[namespace].angle = touch.calc.getAngle(state.start.point[0], end.point[0]);
                 state[namespace].direction = touch.calc.getDirection(state[namespace].angle);
+                state[namespace].distance = distance;
 
                 // fire if the amount of fingers match
                 if (opt.direction === 'all' || state[namespace].direction === opt.direction) {
