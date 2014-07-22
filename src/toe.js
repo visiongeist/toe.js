@@ -1,6 +1,6 @@
 /*!
  * toe.js
- * version 3.0.5
+ * version 3.0.6
  * author: Damien Antipa
  * https://github.com/dantipa/toe.js
  */

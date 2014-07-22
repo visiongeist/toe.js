@@ -1,6 +1,6 @@
 /*!
  * toe.js
- * version 3.0.5
+ * version 3.0.6
  * author: Damien Antipa
  * https://github.com/dantipa/toe.js
  */
@@ -289,6 +289,7 @@
 
                 state[namespace].angle = touch.calc.getAngle(state.start.point[0], end.point[0]);
                 state[namespace].direction = touch.calc.getDirection(state[namespace].angle);
+                state[namespace].distance = distance;
 
                 // fire if the amount of fingers match
                 if (opt.direction === 'all' || state[namespace].direction === opt.direction) {
