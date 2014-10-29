@@ -6,6 +6,19 @@
  */
 (function ($, window, undefined) {
 
+    var INPUT_TYPE_TOUCH = 'touch';
+    var INPUT_TYPE_PEN = 'pen';
+    var INPUT_TYPE_MOUSE = 'mouse';
+    var INPUT_TYPE_KINECT = 'kinect';
+
+    // in IE10 the pointer types is defined as an enum
+    var IE10_POINTER_TYPE_ENUM = {
+        2: INPUT_TYPE_TOUCH,
+        3: INPUT_TYPE_PEN,
+        4: INPUT_TYPE_MOUSE,
+        5: INPUT_TYPE_KINECT // see https://twitter.com/jacobrossi/status/480596438489890816
+    };
+
     var state,
         gestures = {},
         isTouch = 'ontouchstart' in window,
@@ -22,9 +35,12 @@
              * will implicitly be called when including
              */
             on: function () {
-                $(document).on('touchstart MSPointerDown pointerdown', touchstart)
-                    .on('touchmove MSPointerMove MSPointerHover pointermove', touchmove)
-                    .on('touchend touchcancel MSPointerUp MSPointerCancel pointerup pointercancel', touchend);
+                $(document).on('touchstart', touchstart)
+                    .on('MSPointerDown pointerdown', pointerstart)
+                    .on('touchmove', touchmove)
+                    .on('MSPointerMove MSPointerHover pointermove', pointermove)
+                    .on('touchend touchcancel', touchend)
+                    .on('MSPointerUp MSPointerCancel pointerup pointercancel', pointerend);
 
                 touch.active = true;
             },
@@ -216,6 +232,47 @@
         });
     }
 
+
+    /**
+     * @private
+     * @param  {Object} event
+     */
+    function pointerEventIsTouch(event) {
+        var pointerType = IE10_POINTER_TYPE_ENUM[event.originalEvent.pointerType] || event.originalEvent.pointerType;
+        return pointerType === 'touch';
+    }
+    
+    /**
+     * @private
+     * @param  {Object} event
+     */
+    function pointerstart(event) {
+        if (pointerEventIsTouch(event)) {
+            touchstart(event);
+        }
+    }
+
+    /**
+     * @private
+     * @param  {Object} event
+     */
+    function pointermove(event) {
+        if (pointerEventIsTouch(event)) {
+            touchmove(event);
+        }
+    }
+
+    /**
+     * @private
+     * @param  {Object} event
+     */
+    function pointerend(event) {
+        if (pointerEventIsTouch(event)) {
+            touchend(event);
+        }
+    }
+
+
     /**
      * @private
      * @param  {Object} event
@@ -249,6 +306,8 @@
         state.end = end;
 
         loopHandler('touchend', event, state, end);
+
+        state = null;
     }
 
     touch.on();
