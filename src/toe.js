@@ -249,6 +249,8 @@
         state.end = end;
 
         loopHandler('touchend', event, state, end);
+
+        state = null;
     }
 
     touch.on();
