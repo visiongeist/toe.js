@@ -1,0 +1,26 @@
+{
+  "name": "toe.js",
+  "version": "3.0.6",
+  "homepage": "https://github.com/visiongeist/toe.js",
+  "authors": [
+    "Damien Antipa"
+  ],
+  "description": "Advanced touch events for jQuery",
+  "main": "dist/toe.js",
+  "keywords": [
+    "touch",
+    "jQuery",
+    "mobile"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": ">1.7.0"
+  }
+}
