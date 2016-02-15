@@ -85,7 +85,7 @@ This event is also known as pinch event. It allows the user to use two fingers m
 Toe.js is a modular library. In order you do not want to use all events just clone this repo and remove the unwanted gestures under src/gestures. The grunt script does the rest for you.
 	
 ## More information
-(blog entry)[http://damien.antipa.at/2013/03/24/toe-js-version-2-was-released/]
+[Blog entry](http://damien.antipa.at/2013/03/24/toe-js-version-2-was-released/)
 
 ## Thanks
 
