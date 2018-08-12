@@ -37,7 +37,7 @@ Most of the events support multiple fingers. So if you want to find out the amou
 		}
 	});
 	
-Default eventing behavior will not be influenced by the default toe.js events. So in case you want to catch to a swipe event in a scrollable direction then you have to stop the the default behavior on your own.
+Default eventing behavior will not be influenced by the default toe.js events. So in case you want to catch a swipe event in a scrollable direction then you have to stop the default behavior on your own.
 
 	$('div.myElem').on('touchstart touchmove touchend', function (event) {
 		event.preventDefault();
@@ -58,7 +58,7 @@ The "tap" event is somehow similar to a click event with a pointer device so the
 
 ### swipe
 
-The swipe event can be occur in any direction on the element. 
+The swipe event can occur in any direction on the element. 
 
 	$('div.myElem').on('swipe', function (event) {
 		if(event.direction === 'up') { // or right, down, left
@@ -69,12 +69,12 @@ The swipe event can be occur in any direction on the element.
 	
 ### transformstart, transform, transformend
 
-This event is also known as pinch event. It allows the user to use two fingers moving away from or towards each other. The user will be able to signalize a scale or rotation of an object. All three events will deliver the center of the pinch, the rotation and the scale.
+This event is also known as a pinch event. It allows the user to use two fingers moving away from or towards each other. The user will be able to signal a scale or rotation of an object. All three events will deliver the center of the pinch, the rotation and the scale.
 
 	$('div.myElem').on('transform', function (event) {
 		var center = event.center, //center.pageX and center.pageY
 			scale = event.scale,
-			rotation = event.rotation; //in deegres
+			rotation = event.rotation; //in degrees
 		
 		// do sth
 		
@@ -82,7 +82,7 @@ This event is also known as pinch event. It allows the user to use two fingers m
 
 ## Custom build
 
-Toe.js is a modular library. In order you do not want to use all events just clone this repo and remove the unwanted gestures under src/gestures. The grunt script does the rest for you.
+Toe.js is a modular library. If you do not want to use all events just clone this repo and remove the unwanted gestures under src/gestures. The grunt script does the rest for you.
 	
 ## More information
 (blog entry)[http://damien.antipa.at/2013/03/24/toe-js-version-2-was-released/]
